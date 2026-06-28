@@ -19,8 +19,11 @@ int main(int argc, char *argv[]) {
   }
     else{
       printf("exit\n");
-      exit(1);
+      exit(0);
     }
+  if(strcmp(buffer,"exit")==0){
+    exit(0);
+  }
   }
   free(buffer);
   return 0;
