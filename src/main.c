@@ -40,7 +40,7 @@ int main(int argc, char *argv[]) {
       printf("type is a shell builtin\n");
     }
     else{
-      printf("invalid_command: not found\n");
+      printf("%s: not found\n",buffer+5);
     }
   }
 
