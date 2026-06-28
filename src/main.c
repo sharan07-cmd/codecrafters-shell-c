@@ -18,8 +18,8 @@ int main(int argc, char *argv[]) {
     printf("%s: command not found\n",buffer);
   }
     else{
-      printf("$ exit\n");
-      abort();
+      printf("exit\n");
+      exit(1);
     }
   }
   free(buffer);
