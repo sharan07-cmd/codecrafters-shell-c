@@ -10,7 +10,7 @@ int main(int argc, char *argv[]) {
   size_t size=0;
   while (1)
   {
-    printf("$");
+    printf("$ ");
     fflush(stdout);
     ssize_t chars_read=getline(&buffer,&size,stdin);
     buffer[strcspn(buffer,"\n")]='\0';
