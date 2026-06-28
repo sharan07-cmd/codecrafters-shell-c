@@ -19,7 +19,7 @@ int main(int argc, char *argv[]) {
   }
     else{
       printf("$ exit\n");
-      exit(1);
+      abort();
     }
   }
   free(buffer);
