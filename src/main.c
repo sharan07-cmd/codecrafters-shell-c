@@ -1,16 +1,21 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include<string.h>
+#include<sys/types.h>
 
 int main(int argc, char *argv[]) {
   // Flush after every printf
   setbuf(stdout, NULL);
-  char command[1024];
-
-  // TODO: Uncomment the code below to pass the first stage
-  printf("$ ");
-  fgets(command,sizeof(command),stdin);
-  command[strcspn(command,"\n")]='\0';
-  printf("%s: command not found", command);
+  char *buffer=NULL;
+  size_t size=0;
+  while (1)
+  {
+    printf("$");
+    fflush(stdout);
+    ssize_t chars_read=getline(&buffer,&size,stdin);
+    buffer[strcspn(buffer,"\n")]='\0';
+    printf("%s: command not found\n",buffer);
+  }
+  free(buffer);
   return 0;
 }
