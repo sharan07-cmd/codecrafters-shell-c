@@ -13,6 +13,9 @@ int main(int argc, char *argv[]) {
     printf("$ ");
     fflush(stdout);
     ssize_t chars_read=getline(&buffer,&size,stdin);
+    if(strcmp(buffer,"exit")==0){
+    exit(0);
+  }
     if(chars_read!=-1){
     buffer[strcspn(buffer,"\n")]='\0';
     printf("%s: command not found\n",buffer);
@@ -21,9 +24,6 @@ int main(int argc, char *argv[]) {
       printf("exit\n");
       exit(0);
     }
-  if(strcmp(buffer,"exit")==0){
-    exit(0);
-  }
   }
   free(buffer);
   return 0;
