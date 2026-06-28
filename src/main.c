@@ -14,16 +14,16 @@ int main(int argc, char *argv[]) {
     fflush(stdout);
     ssize_t chars_read=getline(&buffer,&size,stdin);
     if(strcmp(buffer,"exit")==0){
-    exit(0);
+    break;
   }
-    if(chars_read!=-1){
-    buffer[strcspn(buffer,"\n")]='\0';
-    printf("%s: command not found\n",buffer);
-  }
-    else{
+  if(chars_read==-1){
       printf("exit\n");
       exit(0);
     }
+    else if(chars_read!=-1){
+    buffer[strcspn(buffer,"\n")]='\0';
+    printf("%s: command not found\n",buffer);
+  }
   }
   free(buffer);
   return 0;
