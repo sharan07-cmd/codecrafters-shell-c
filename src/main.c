@@ -8,25 +8,37 @@ int main(int argc, char *argv[]) {
   setbuf(stdout, NULL);
   char *buffer=NULL;
   size_t size=0;
+
   while (1)
   {
     printf("$ ");
     fflush(stdout);
     ssize_t chars_read=getline(&buffer,&size,stdin);
     buffer[strcspn(buffer,"\n")]='\0';
+
     if(strcmp(buffer,"exit")==0){
     break;
   }
-  if(chars_read==-1){
-      printf("exit\n");
-      exit(0);
+
+    if(chars_read==-1){
+        printf("exit\n");
+        exit(0);
+      }
+
+  else if(strncmp(buffer, "echo ", 5) == 0){
+      printf("%s\n",buffer+5);
     }
- else if(strncmp(buffer, "echo ", 5) == 0){
-    printf("%s\n",buffer+5);
-  }
-    else if(chars_read!=-1){
-    printf("%s: command not found\n",buffer);
-  }
+  
+  else if (strcmp(builtin, "type") == 0) {
+      if (!strcmp(arg, "exit") || !strcmp(arg, "echo") || !strcmp(arg, "type"))
+        printf("%s is a shell builtin\n", arg);
+      else
+        printf("%s: not found\n", arg);
+
+      else if(chars_read!=-1){
+      printf("%s: command not found\n",buffer);
+    }
+
   }
   free(buffer);
   return 0;
