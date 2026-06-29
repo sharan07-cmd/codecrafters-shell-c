@@ -43,7 +43,7 @@ int main(int argc, char *argv[]) {
 
   else if(strncmp(buffer,"cd ",3)==0){
     if(chdir(buffer+3)!=0){
-        printf("%s\n",buffer+3);
+        printf("cd: %s: No such file or directory\n", buffer+3);;
     }
   }
   
