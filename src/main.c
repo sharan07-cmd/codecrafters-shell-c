@@ -37,7 +37,7 @@ int main(int argc, char *argv[]) {
         printf("%s\n",cwd);
     }
     else{
-        printf("ERROR FINDING THE DIRECTORY");
+        printf("ERROR FINDING THE DIRECTORY\n");
     }
   }
 
@@ -46,7 +46,7 @@ int main(int argc, char *argv[]) {
         printf("%s\n",buffer+3);
     }
     else{
-        printf("ERROR");
+        printf("ERROR\n");
     }
   }
   
