@@ -40,10 +40,19 @@ int main(int argc, char *argv[]) {
         printf("ERROR FINDING THE DIRECTORY");
     }
   }
+
+  else if(strncmp(buffer,"cd ",3)==0){
+    if(chdir(buffer+3)!=0){
+        printf("%s\n",buffer+3);
+    }
+    else{
+        printf("ERROR");
+    }
+  }
   
   else if (strncmp(buffer, "type ", 5) == 0) {
         char *cmd = buffer + 5; 
-        if (strcmp(cmd, "echo") == 0 || strcmp(cmd, "exit") == 0 || strcmp(cmd, "type") == 0 || strcmp(cmd, "pwd") == 0) {
+        if (strcmp(cmd, "echo") == 0 || strcmp(cmd, "exit") == 0 || strcmp(cmd, "type") == 0 || strcmp(cmd, "pwd") == 0 || strcmp(cmd,"cd")==0) {
             printf("%s is a shell builtin\n", cmd);
         } 
        
