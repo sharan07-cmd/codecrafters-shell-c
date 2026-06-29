@@ -45,9 +45,6 @@ int main(int argc, char *argv[]) {
     if(chdir(buffer+3)!=0){
         printf("%s\n",buffer+3);
     }
-    else{
-        printf("ERROR\n");
-    }
   }
   
   else if (strncmp(buffer, "type ", 5) == 0) {
