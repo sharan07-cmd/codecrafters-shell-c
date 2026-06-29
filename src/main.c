@@ -33,7 +33,7 @@ int main(int argc, char *argv[]) {
 
   else if(strcmp(buffer, "pwd")==0){
     char cwd[1024];
-    if(getcwd(cwd,sizeof(cwd))!=NULL{
+    if(getcwd(cwd,sizeof(cwd))!=NULL){
         printf("%s\n",cwd);
     }
     else{
