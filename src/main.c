@@ -42,10 +42,21 @@ int main(int argc, char *argv[]) {
   }
 
   else if(strncmp(buffer,"cd ",3)==0){
-    if(chdir(buffer+3)!=0){
+    char *target_dir=buffer+3;
+    if(strcmp(target_dir,"~")==0){
+        char *home_dir=getenv("HOME");
+        if(home_dir!=NULL){
+            chdir(home_dir);
+        }
+        else{
+            printf("cd: HOME NOT SET\n");
+        }
+    }
+    else if(chdir(buffer+3)!=0){
         printf("cd: %s: No such file or directory\n", buffer+3);;
     }
   }
+
   
   else if (strncmp(buffer, "type ", 5) == 0) {
         char *cmd = buffer + 5; 
