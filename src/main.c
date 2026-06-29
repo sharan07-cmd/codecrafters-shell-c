@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include<string.h>
 #include<sys/types.h>
+#include<unistd.h>
 
 int main(int argc, char *argv[]) {
   // Flush after every printf
@@ -29,20 +30,42 @@ int main(int argc, char *argv[]) {
       printf("%s\n",buffer+5);
     }
   
-  else if(strncmp(buffer, "type ",5)==0){
-    if(strncmp(buffer+5,"echo",4)==0){
-      printf("echo is a shell builtin\n");
+  else if (strncmp(buffer, "type ", 5) == 0) {
+        char *cmd = buffer + 5; 
+        if (strcmp(cmd, "echo") == 0 || strcmp(cmd, "exit") == 0 || strcmp(cmd, "type") == 0) {
+            printf("%s is a shell builtin\n", cmd);
+        } 
+       
+        else {
+            char *path_env = getenv("PATH");
+            int found = 0;
+
+            if (path_env != NULL) {
+                
+                char *path_copy = malloc(strlen(path_env) + 1);
+                strcpy(path_copy, path_env);
+                char *dir = strtok(path_copy, ":");
+
+                while (dir != NULL) {
+                    char file_path[1024];
+                    snprintf(file_path, sizeof(file_path), "%s/%s", dir, cmd);
+
+                    if (access(file_path, X_OK) == 0) {
+                        printf("%s is %s\n", cmd, file_path);
+                        found = 1;
+                        break; 
+                    }
+                    
+                    dir = strtok(NULL, ":"); 
+                }
+                free(path_copy);
+            }
+
+            if (found == 0) {
+                printf("%s: not found\n", cmd);
+            }
+        }
     }
-    else if(strncmp(buffer+5,"exit",4)==0){
-      printf("exit is a shell builtin\n");
-    }
-    else if(strncmp(buffer+5,"type",4)==0){
-      printf("type is a shell builtin\n");
-    }
-    else{
-      printf("%s: not found\n",buffer+5);
-    }
-  }
 
       else if(chars_read!=-1){
       printf("%s: command not found\n",buffer);
