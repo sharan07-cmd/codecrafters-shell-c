@@ -67,9 +67,34 @@ int main(int argc, char *argv[]) {
         }
     }
 
-      else if(chars_read!=-1){
-      printf("%s: command not found\n",buffer);
-    }
+        else if (strlen(buffer) > 0) { 
+            
+            char *args[1024];
+            int i = 0;
+            args[i] = strtok(buffer, " ");
+            while (args[i] != NULL) {
+                i++;
+                args[i] = strtok(NULL, " ");
+            }
+
+            if (args[0] != NULL) {
+                pid_t pid = fork();       /// The parent code is cloned
+
+                if (pid < 0) {            /// The clone failed
+                    printf("Error: Failed to fork process.\n");
+                } 
+                else if (pid == 0) {      /// The clone is executing the command
+                    execvp(args[0], args);
+                    
+                    // CodeCrafters specific error formatting!
+                    printf("%s: command not found\n", args[0]); 
+                    exit(1);
+                } 
+                else if (pid > 0) {       /// You are in the parent code
+                    wait(NULL);           /// The parent is put to sleep until the command executes
+                }
+            }
+        }
 
   }
   free(buffer);
