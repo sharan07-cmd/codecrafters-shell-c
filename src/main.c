@@ -162,21 +162,21 @@ int main(int argc, char *argv[]) {
 
     while(*quote_find!='\0'){
         // REVISED BACKSLASH CONDITION
-if (*quote_find == '\\') {
-    quote_find++; // Move to the next char
-    
-    // If it's a special character that needs escaping, strip the backslash
-    if (*quote_find == ' ' || *quote_find == '\\' || *quote_find == '\'' || *quote_find == '"') {
-        arg_buffer[arg_len] = *quote_find;
-    } 
-    // If it's just a normal character (like '_'), keep the backslash!
-    else {
-        arg_buffer[arg_len] = '\\';
-        arg_len++;
-        arg_buffer[arg_len] = *quote_find;
-    }
-    arg_len++;
-}
+        if (*quote_find == '\\') {
+            quote_find++; // Move to the next char
+            
+            // If it's a special character that needs escaping, strip the backslash
+            if (*quote_find == ' ' || *quote_find == '\\' || *quote_find == '\'' || *quote_find == '"') {
+                arg_buffer[arg_len] = *quote_find;
+            } 
+            // If it's just a normal character (like '_'), keep the backslash!
+            else {
+                arg_buffer[arg_len] = '\\';
+                arg_len++;
+                arg_buffer[arg_len] = *quote_find;
+            }
+            arg_len++;
+        }
         
         // 2. Double Quote
         else if (*quote_find == '"' && sin_quote == 0) {
