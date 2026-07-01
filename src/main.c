@@ -37,7 +37,16 @@ int main(int argc, char *argv[]) {
     }
     while(*quote_find!='\0'){
 
-        if(*quote_find==' ' && sin_flag==0 && dou_flag==0){
+        if (*quote_find == '\\') {
+            quote_find++;          
+            putchar(*quote_find);  
+        }
+
+        else if (*quote_find == '\'' && sin_flag== 0) {
+            sin_flag=!sin_flag;
+        }
+
+        else if(*quote_find==' ' && sin_flag==0 && dou_flag==0){
             putchar(' ');
             while(*(quote_find+1)==' '){
                 quote_find++; 
@@ -90,6 +99,7 @@ int main(int argc, char *argv[]) {
     else if(chdir(buffer+3)!=0){
         printf("cd: %s: No such file or directory\n", buffer+3);;
     }
+
   }
 
   
@@ -122,13 +132,16 @@ int main(int argc, char *argv[]) {
                     
                     dir = strtok(NULL, ":"); 
                 }
+
                 free(path_copy);
             }
 
             if (found == 0) {
                 printf("%s: not found\n", cmd);
             }
+            
         }
+
     }
 
   else if (strlen(buffer) > 0) { 
