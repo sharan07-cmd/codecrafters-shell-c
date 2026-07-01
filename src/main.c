@@ -177,16 +177,6 @@ int main(int argc, char *argv[]) {
             doub_quote = !doub_quote;
         }
 
-        else if(*quote_find==' ' && sin_quote==0 && doub_quote==0){
-            arg_buffer[arg_len]='\0';
-            args[argc_count]=strdup(arg_buffer);
-            argc_count++;
-            arg_len=0;
-            while(*(quote_find+1)==' '){
-                    quote_find++;
-            }
-        }
-
         else{
             arg_buffer[arg_len]=*quote_find;
             arg_len++;
