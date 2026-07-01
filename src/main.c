@@ -28,12 +28,30 @@ int main(int argc, char *argv[]) {
       }
 
   else if(strncmp(buffer, "echo ", 5) == 0){
-      
-      printf("%s\n",buffer+5);
-
+      char *quote_find= buffer+5 ;
+    int quote_flag=0;
+    while(*quote_find==' '&& quote_flag==0){
+        quote_find++;
     }
-
-  else if(strcmp(buffer, "pwd")==0){
+    while(*quote_find!='\0'){
+        if(*quote_find==' ' && quote_flag==0 ){
+            putchar(' ');
+            while(*(quote_find+1)==' '){
+                quote_find++; 
+            }
+        }
+        else if(*quote_find=='\''){
+            quote_flag=!quote_flag;
+        }
+        else{
+            putchar(*quote_find);
+        }
+        quote_find++;
+        }
+        putchar('\n');
+    }
+    
+    else if(strcmp(buffer, "pwd")==0){
     char cwd[1024];
     if(getcwd(cwd,sizeof(cwd))!=NULL){
         printf("%s\n",cwd);
