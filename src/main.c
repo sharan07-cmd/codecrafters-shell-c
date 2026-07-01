@@ -28,26 +28,37 @@ int main(int argc, char *argv[]) {
       }
 
   else if(strncmp(buffer, "echo ", 5) == 0){
-      char *quote_find= buffer+5 ;
-    int quote_flag=0;
-    while(*quote_find==' '&& quote_flag==0){
+    char *quote_find= buffer+5 ;
+    int sin_flag=0;
+    int dou_flag=0;
+
+    while(*quote_find==' '){
         quote_find++;
     }
     while(*quote_find!='\0'){
-        if(*quote_find==' ' && quote_flag==0 ){
+
+        if(*quote_find==' ' && sin_flag==0 && dou_flag==0){
             putchar(' ');
             while(*(quote_find+1)==' '){
                 quote_find++; 
             }
         }
-        else if(*quote_find=='\''){
-            quote_flag=!quote_flag;
+
+        else if(*quote_find=='\'' && dou_flag==0){
+           sin_flag=!sin_flag;
         }
+
+        else if (*quote_find == '"' && sin_flag == 0) {
+            dou_flag=!dou_flag;
+        }
+
         else{
             putchar(*quote_find);
         }
+
         quote_find++;
         }
+
         putchar('\n');
     }
 
