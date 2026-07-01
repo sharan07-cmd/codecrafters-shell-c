@@ -28,7 +28,9 @@ int main(int argc, char *argv[]) {
       }
 
   else if(strncmp(buffer, "echo ", 5) == 0){
+      
       printf("%s\n",buffer+5);
+
     }
 
   else if(strcmp(buffer, "pwd")==0){
@@ -43,15 +45,19 @@ int main(int argc, char *argv[]) {
 
   else if(strncmp(buffer,"cd ",3)==0){
     char *target_dir=buffer+3;
+
     if(strcmp(target_dir,"~")==0){
         char *home_dir=getenv("HOME");
+
         if(home_dir!=NULL){
             chdir(home_dir);
         }
+
         else{
             printf("cd: HOME NOT SET\n");
-        }
+        }    
     }
+
     else if(chdir(buffer+3)!=0){
         printf("cd: %s: No such file or directory\n", buffer+3);;
     }
@@ -60,6 +66,7 @@ int main(int argc, char *argv[]) {
   
   else if (strncmp(buffer, "type ", 5) == 0) {
         char *cmd = buffer + 5; 
+
         if (strcmp(cmd, "echo") == 0 || strcmp(cmd, "exit") == 0 || strcmp(cmd, "type") == 0 || strcmp(cmd, "pwd") == 0 || strcmp(cmd,"cd")==0) {
             printf("%s is a shell builtin\n", cmd);
         } 
@@ -100,6 +107,7 @@ int main(int argc, char *argv[]) {
             char *args[1024];
             int i = 0;
             args[i] = strtok(buffer, " ");
+
             while (args[i] != NULL) {
                 i++;
                 args[i] = strtok(NULL, " ");
@@ -111,6 +119,7 @@ int main(int argc, char *argv[]) {
                 if (pid < 0) {            /// The clone failed
                     printf("Error: Failed to fork process.\n");
                 } 
+
                 else if (pid == 0) {      /// The clone is executing the command
                     execvp(args[0], args);
                     
@@ -118,6 +127,7 @@ int main(int argc, char *argv[]) {
                     printf("%s: command not found\n", args[0]); 
                     exit(1);
                 } 
+                                
                 else if (pid > 0) {       /// You are in the parent code
                     wait(NULL);           /// The parent is put to sleep until the command executes
                 }
