@@ -128,7 +128,8 @@ int main(int argc, char *argv[]) {
     char arg_buffer[1024];
     int arg_len = 0;
 
-    int quote_flag = 0;
+    int sin_quote = 0;
+    int doub_quote = 0;
     char *quote_find = buffer;
 
     while (*quote_find == ' ') {
@@ -136,11 +137,15 @@ int main(int argc, char *argv[]) {
     }
 
     while(*quote_find!='\0'){
-        if(*quote_find=='\''){
-            quote_flag=!quote_flag;
+        if(*quote_find=='\'' && doub_quote==0){
+            sin_quote=!sin_quote;  
         }
 
-        else if(*quote_find==' ' && quote_flag==0){
+        else if (*quote_find == '"' && sin_quote == 0) {
+            doub_quote=!doub_quote;
+        }
+
+        else if(*quote_find==' ' && sin_quote==0 && doub_quote==0){
             arg_buffer[arg_len]='\0';
             args[argc_count]=strdup(arg_buffer);
             argc_count++;
