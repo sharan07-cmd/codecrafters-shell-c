@@ -50,7 +50,7 @@ int main(int argc, char *argv[]) {
         }
         putchar('\n');
     }
-    
+
     else if(strcmp(buffer, "pwd")==0){
     char cwd[1024];
     if(getcwd(cwd,sizeof(cwd))!=NULL){
@@ -120,39 +120,68 @@ int main(int argc, char *argv[]) {
         }
     }
 
-        else if (strlen(buffer) > 0) { 
+  else if (strlen(buffer) > 0) { 
             
-            char *args[1024];
-            int i = 0;
-            args[i] = strtok(buffer, " ");
+    char *args[1024];
+    int argc_count = 0;
 
-            while (args[i] != NULL) {
-                i++;
-                args[i] = strtok(NULL, " ");
-            }
+    char arg_buffer[1024];
+    int arg_len = 0;
 
-            if (args[0] != NULL) {
-                pid_t pid = fork();       /// The parent code is cloned
+    int quote_flag = 0;
+    char *quote_find = buffer;
 
-                if (pid < 0) {            /// The clone failed
-                    printf("Error: Failed to fork process.\n");
-                } 
+    while (*quote_find == ' ') {
+        quote_find++;
+    }
 
-                else if (pid == 0) {      /// The clone is executing the command
-                    execvp(args[0], args);
-                    
-                    // CodeCrafters specific error formatting!
-                    printf("%s: command not found\n", args[0]); 
-                    exit(1);
-                } 
-                                
-                else if (pid > 0) {       /// You are in the parent code
-                    wait(NULL);           /// The parent is put to sleep until the command executes
-                }
+    while(*quote_find!='\0'){
+        if(*quote_find=='\''){
+            quote_flag=!quote_flag;
+        }
+
+        else if(*quote_find==' ' && quote_flag==0){
+            arg_buffer[arg_len]='\0';
+            args[argc_count]=strdup(arg_buffer);
+            argc_count++;
+            arg_len=0;
+            while(*(quote_find+1)==' '){
+                    quote_find++;
             }
         }
 
-  }
+        else{
+            arg_buffer[arg_len]=*quote_find;
+            arg_len++;
+        }
+        quote_find++;
+    }
+    if(arg_len>0){
+        arg_buffer[arg_len]='\0';
+        args[argc_count]=strdup(arg_buffer);
+        argc_count++ ;
+    }
+    args[argc_count]=NULL;
+
+    if (args[0] != NULL) {
+        pid_t pid = fork();       
+        if (pid < 0) {           
+            printf("Error: Failed to fork process.\n");
+        } 
+
+        else if (pid == 0) {     
+            execvp(args[0], args);
+                    
+            printf("%s: command not found\n", args[0]); 
+            exit(1);
+        } 
+                                
+        else if (pid > 0) {       
+            wait(NULL);           
+        }
+    }
+}
+}
   free(buffer);
   return 0;
 }
