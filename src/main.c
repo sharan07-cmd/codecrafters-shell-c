@@ -161,12 +161,20 @@ int main(int argc, char *argv[]) {
     }
 
     while(*quote_find!='\0'){
-        if(*quote_find=='\'' && doub_quote==0){
-            sin_quote=!sin_quote;  
+        if (*quote_find == '\\' && sin_quote == 0 && doub_quote == 0) {
+            quote_find++;
+            arg_buffer[arg_len] = *quote_find;
+            arg_len++;
         }
-
+        
+        // 1. Single Quote (Notice this is an 'else if' now!)
+        else if (*quote_find == '\'' && doub_quote == 0) {
+            sin_quote = !sin_quote;
+        }
+        
+        // 2. Double Quote
         else if (*quote_find == '"' && sin_quote == 0) {
-            doub_quote=!doub_quote;
+            doub_quote = !doub_quote;
         }
 
         else if(*quote_find==' ' && sin_quote==0 && doub_quote==0){
