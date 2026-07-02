@@ -73,12 +73,15 @@ int main(int argc, char *argv[]) {
 
     else if(strcmp(buffer, "pwd")==0){
     char cwd[1024];
+
     if(getcwd(cwd,sizeof(cwd))!=NULL){
         printf("%s\n",cwd);
     }
+
     else{
         printf("ERROR FINDING THE DIRECTORY\n");
     }
+
   }
 
   else if(strncmp(buffer,"cd ",3)==0){
@@ -163,13 +166,13 @@ int main(int argc, char *argv[]) {
     while(*quote_find!='\0'){
 
         if (*quote_find == '\\') {
-            quote_find++; // Move to the next char
+            quote_find++; 
             
-            // If it's a special character that needs escaping, strip the backslash
+            
             if (*quote_find == ' ' || *quote_find == '\\' || *quote_find == '\'' || *quote_find == '"') {
                 arg_buffer[arg_len] = *quote_find;
             } 
-            // If it's just a normal character (like '_'), keep the backslash!
+            
             else {
                 arg_buffer[arg_len] = '\\';
                 arg_len++;
@@ -177,8 +180,11 @@ int main(int argc, char *argv[]) {
             }
             arg_len++;
         }
+
+        else if (*quote_find == '\'' && doub_quote == 0) {
+            sin_quote = !sin_quote;
+        }
         
-        // 2. Double Quote
         else if (*quote_find == '"' && sin_quote == 0) {
             doub_quote = !doub_quote;
         }
