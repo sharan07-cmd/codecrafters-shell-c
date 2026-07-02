@@ -36,32 +36,27 @@ int main(int argc, char *argv[]) {
         quote_find++;
     }
     while(*quote_find!='\0'){
-
-        if (*quote_find == '\\') {
-            quote_find++;          
-            putchar(*quote_find);  
+        if (*quote_find == '\\' && sin_flag == 0 && dou_flag == 0) {
+            quote_find++;
+            putchar(*quote_find);
         }
 
-        else if (*quote_find == '\'' && sin_flag== 0) {
-            sin_flag=!sin_flag;
-        }
-
-        else if(*quote_find==' ' && sin_flag==0 && dou_flag==0){
-            putchar(' ');
-            while(*(quote_find+1)==' '){
-                quote_find++; 
-            }
-        }
-
-        else if(*quote_find=='\'' && dou_flag==0){
-           sin_flag=!sin_flag;
+        else if (*quote_find == '\'' && dou_flag == 0) {
+            sin_flag = !sin_flag;
         }
 
         else if (*quote_find == '"' && sin_flag == 0) {
-            dou_flag=!dou_flag;
+            dou_flag = !dou_flag;
         }
 
-        else{
+        else if (*quote_find == ' ' && sin_flag == 0 && dou_flag == 0) {
+            putchar(' ');
+            while(*(quote_find + 1) == ' ') {
+                quote_find++;
+            }
+        }
+
+        else {
             putchar(*quote_find);
         }
 
