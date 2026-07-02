@@ -1,120 +1,167 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include<string.h>
-#include<sys/types.h>
-#include<unistd.h>
-#include<sys/wait.h>
+#include <string.h>
+#include <sys/types.h>
+#include <unistd.h>
+#include <sys/wait.h>
+#include <fcntl.h>
 
 int main(int argc, char *argv[]) {
-  // Flush after every printf
+
   setbuf(stdout, NULL);
   char *buffer=NULL;
   size_t size=0;
 
   while (1)
   {
+
     printf("$ ");
     fflush(stdout);
     ssize_t chars_read=getline(&buffer,&size,stdin);
     buffer[strcspn(buffer,"\n")]='\0';
 
+    char *q_search=buffer;
+    int s_flag=0;
+    int d_flag=0;
+    int saved_stdout=dup(1);
+
     if(strcmp(buffer,"exit")==0){
     break;
-  }
+    }
+    
+    while(*q_search!='\0'){
+        int skip_len=0;
+
+        if(*q_search=='\'' && d_flag==0){
+            s_flag=!s_flag;
+        }
+
+        else if(*q_search=='"' && s_flag==0){
+            d_flag=!d_flag;
+        }
+
+        else if((*q_search=='>' || (*q_search =='1' && *(q_search+1)=='>')) && s_flag==0 && d_flag == 0 ){
+
+            char *anchor=q_search;
+
+            if(*q_search=='>'){
+                anchor=q_search+1;
+                while(*(anchor)==' '){
+                    anchor++;
+                }
+            }
+            
+            else if(*q_search=='1'){
+                anchor=anchor+2;
+
+                while(*anchor==' '){
+                    anchor++;
+                }
+            }
+            *q_search='\0';
+            int fd=open(anchor, O_WRONLY | O_CREAT | O_TRUNC, 0644);
+            if(fd!=-1){
+                dup2(fd,1);
+                close(fd);
+            }
+            break;
+        }
+        *q_search++;
+    }
 
     if(chars_read==-1){
         printf("exit\n");
         exit(0);
-      }
+    }       
 
-  else if(strncmp(buffer, "echo ", 5) == 0){
-    char *quote_find= buffer+5 ;
-    int sin_flag=0;
-    int dou_flag=0;
+    else if(strncmp(buffer, "echo ", 5) == 0){
+        char *quote_find= buffer+5 ;
+        int sin_flag=0;
+        int dou_flag=0;
 
-    while(*quote_find==' '){
-        quote_find++;
-    }
-    while(*quote_find!='\0'){
-        if (*quote_find == '\\' && sin_flag == 0 && dou_flag == 0) {
+        while(*quote_find==' '){
             quote_find++;
-            putchar(*quote_find);
         }
-
-        else if(*quote_find=='\\' && dou_flag==1){
-
-            if(*(quote_find+1)=='"' || *(quote_find+1)=='\\'){
-                quote_find++ ;
-                putchar(*quote_find);
-            }
-
-            else{
-                putchar(*quote_find);
-            }
-
-        }
-
-        else if (*quote_find == '\'' && dou_flag == 0) {
-            sin_flag = !sin_flag;
-        }
-
-        else if (*quote_find == '"' && sin_flag == 0) {
-            dou_flag = !dou_flag;
-        }
-
-        else if (*quote_find == ' ' && sin_flag == 0 && dou_flag == 0) {
-            putchar(' ');
-            while(*(quote_find + 1) == ' ') {
+        while(*quote_find!='\0'){
+            if (*quote_find == '\\' && sin_flag == 0 && dou_flag == 0) {
                 quote_find++;
+                putchar(*quote_find);
             }
-        }
 
-        else {
-            putchar(*quote_find);
-        }
+            else if(*quote_find=='\\' && dou_flag==1){
 
-        quote_find++;
+                if(*(quote_find+1)=='"' || *(quote_find+1)=='\\'){
+                    quote_find++ ;
+                    putchar(*quote_find);
+                }
+
+                else{
+                    putchar(*quote_find);
+                }
+
+            }
+
+            else if (*quote_find == '\'' && dou_flag == 0) {
+                sin_flag = !sin_flag;
+            }
+
+            else if (*quote_find == '"' && sin_flag == 0) {
+                dou_flag = !dou_flag;
+            }
+
+            else if (*quote_find == ' ' && sin_flag == 0 && dou_flag == 0) {
+                putchar(' ');
+                while(*(quote_find + 1) == ' ') {
+                    quote_find++;
+                }
+            }
+
+            else {
+                putchar(*quote_find);
+            }
+
+            quote_find++;
         }
 
         putchar('\n');
     }
 
     else if(strcmp(buffer, "pwd")==0){
-    char cwd[1024];
+        char cwd[1024];
 
-    if(getcwd(cwd,sizeof(cwd))!=NULL){
-        printf("%s\n",cwd);
-    }
-
-    else{
-        printf("ERROR FINDING THE DIRECTORY\n");
-    }
-
-  }
-
-  else if(strncmp(buffer,"cd ",3)==0){
-    char *target_dir=buffer+3;
-
-    if(strcmp(target_dir,"~")==0){
-        char *home_dir=getenv("HOME");
-
-        if(home_dir!=NULL){
-            chdir(home_dir);
+        if(getcwd(cwd,sizeof(cwd))!=NULL){
+            printf("%s\n",cwd);
         }
 
         else{
-            printf("cd: HOME NOT SET\n");
-        }    
+            printf("ERROR FINDING THE DIRECTORY\n");
+        }
+
     }
 
-    else if(chdir(buffer+3)!=0){
-        printf("cd: %s: No such file or directory\n", buffer+3);;
-    }
+    else if(strncmp(buffer,"cd ",3)==0){
+        char *target_dir=buffer+3;
 
-  }
+        if(strcmp(target_dir,"~")==0){
+            char *home_dir=getenv("HOME");
+
+            if(home_dir!=NULL){
+                chdir(home_dir);
+            }
+
+            else{
+                printf("cd: HOME NOT SET\n");
+            }    
+        }
+
+        else if(chdir(buffer+3)!=0){
+            printf("cd: %s: No such file or directory\n", buffer+3);;
+        }
+
+    }
 
   
-  else if (strncmp(buffer, "type ", 5) == 0) {
+    else if (strncmp(buffer, "type ", 5) == 0) {
         char *cmd = buffer + 5; 
 
         if (strcmp(cmd, "echo") == 0 || strcmp(cmd, "exit") == 0 || strcmp(cmd, "type") == 0 || strcmp(cmd, "pwd") == 0 || strcmp(cmd,"cd")==0) {
@@ -155,94 +202,97 @@ int main(int argc, char *argv[]) {
 
     }
 
-  else if (strlen(buffer) > 0) { 
+    else if (strlen(buffer) > 0) { 
             
-    char *args[1024];
-    int argc_count = 0;
+        char *args[1024];
+        int argc_count = 0;
 
-    char arg_buffer[1024];
-    int arg_len = 0;
+        char arg_buffer[1024];
+        int arg_len = 0;
 
-    int sin_quote = 0;
-    int doub_quote = 0;
-    char *quote_find = buffer;
+        int sin_quote = 0;
+        int doub_quote = 0;
+        char *quote_find = buffer;
 
-    while (*quote_find == ' ') {
-        quote_find++;
-    }
-
-    while(*quote_find!='\0'){
-
-        if (*quote_find == '\\' && sin_quote == 0 && doub_quote == 0) {
-            quote_find++;                        
-            arg_buffer[arg_len] = *quote_find;   
-            arg_len++;
+        while (*quote_find == ' ') {
+            quote_find++;
         }
 
-        else if(*quote_find=='\\' && doub_quote==1){
-            if(*(quote_find+1)=='"' || *(quote_find+1)=='\\'){
-                quote_find++;
-                arg_buffer[arg_len]=*quote_find;
+        while(*quote_find!='\0'){
+
+            if (*quote_find == '\\' && sin_quote == 0 && doub_quote == 0) {
+                quote_find++;                        
+                arg_buffer[arg_len] = *quote_find;   
                 arg_len++;
+            }
+
+            else if(*quote_find=='\\' && doub_quote==1){
+
+                if(*(quote_find+1)=='"' || *(quote_find+1)=='\\'){
+                    quote_find++;
+                    arg_buffer[arg_len]=*quote_find;
+                    arg_len++;
+                }
+
+                else{
+                    arg_buffer[arg_len]=*quote_find;
+                    arg_len++;
+                }
+            }
+
+            else if (*quote_find == '\'' && doub_quote == 0) {
+                sin_quote = !sin_quote;
+            }
+        
+            else if (*quote_find == '"' && sin_quote == 0) {
+                doub_quote = !doub_quote;
+            }
+
+            else if(*quote_find==' ' && sin_quote==0 && doub_quote==0){
+                arg_buffer[arg_len]='\0';
+                args[argc_count]=strdup(arg_buffer);
+                argc_count++;
+                arg_len=0;
+                while(*(quote_find+1)==' '){
+                    quote_find++;
+                }
             }
 
             else{
                 arg_buffer[arg_len]=*quote_find;
                 arg_len++;
             }
+        quote_find++;
         }
 
-        else if (*quote_find == '\'' && doub_quote == 0) {
-            sin_quote = !sin_quote;
-        }
-        
-        else if (*quote_find == '"' && sin_quote == 0) {
-            doub_quote = !doub_quote;
-        }
-
-        else if(*quote_find==' ' && sin_quote==0 && doub_quote==0){
+        if(arg_len>0){
             arg_buffer[arg_len]='\0';
             args[argc_count]=strdup(arg_buffer);
-            argc_count++;
-            arg_len=0;
-            while(*(quote_find+1)==' '){
-                    quote_find++;
+            argc_count++ ;
+        }
+        args[argc_count]=NULL;
+
+        if (args[0] != NULL) {
+            pid_t pid = fork();       
+            if (pid < 0) {           
+                printf("Error: Failed to fork process.\n");
+            } 
+
+            else if (pid == 0) {     
+                execvp(args[0], args);
+                    
+                printf("%s: command not found\n", args[0]); 
+                exit(1);
+            } 
+                                
+            else if (pid > 0) {       
+                wait(NULL);           
             }
         }
-
-        else{
-            arg_buffer[arg_len]=*quote_find;
-            arg_len++;
-        }
-        quote_find++;
     }
+    dup2(saved_stdout,1);
+  }
 
-    if(arg_len>0){
-        arg_buffer[arg_len]='\0';
-        args[argc_count]=strdup(arg_buffer);
-        argc_count++ ;
-    }
-    args[argc_count]=NULL;
-
-    if (args[0] != NULL) {
-        pid_t pid = fork();       
-        if (pid < 0) {           
-            printf("Error: Failed to fork process.\n");
-        } 
-
-        else if (pid == 0) {     
-            execvp(args[0], args);
-                    
-            printf("%s: command not found\n", args[0]); 
-            exit(1);
-        } 
-                                
-        else if (pid > 0) {       
-            wait(NULL);           
-        }
-    }
-}
-}
   free(buffer);
   return 0;
 }
