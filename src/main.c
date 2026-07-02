@@ -41,6 +41,19 @@ int main(int argc, char *argv[]) {
             putchar(*quote_find);
         }
 
+        else if(*quote_find=='\\' && dou_flag==1){
+
+            if(*(quote_find+1)=='"' || *(quote_find+1)=='\\'){
+                quote_find++ ;
+                putchar(*quote_find);
+            }
+
+            else{
+                putchar(*quote_find);
+            }
+
+        }
+
         else if (*quote_find == '\'' && dou_flag == 0) {
             sin_flag = !sin_flag;
         }
@@ -164,6 +177,19 @@ int main(int argc, char *argv[]) {
             quote_find++;                        
             arg_buffer[arg_len] = *quote_find;   
             arg_len++;
+        }
+
+        else if(*quote_find=='\\' && doub_quote==1){
+            if(*(quote_find+1)=='"' || *(quote_find+1)=='\\'){
+                quote_find++;
+                arg_buffer[arg_len]=*quote_find;
+                arg_len++;
+            }
+
+            else{
+                arg_buffer[arg_len]=*quote_find;
+                arg_len++;
+            }
         }
 
         else if (*quote_find == '\'' && doub_quote == 0) {
