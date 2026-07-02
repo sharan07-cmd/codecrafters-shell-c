@@ -46,33 +46,60 @@ int main(int argc, char *argv[]) {
 
             char *anchor=q_search;
             int tar_fd=1;
+            int append=0;
 
             if(*q_search=='>'){
-                anchor=q_search+1;
-                while(*(anchor)==' '){
-                    anchor++;
+                if(*(q_search+1)=='>'){
+                    append=1;
+                    anchor=q_search+2;
+                    while(*(anchor)==' '){
+                        anchor++;
+                    }
+                }
+                else{
+                    anchor=q_search+1;
+                    while(*(anchor)==' '){
+                        anchor++;
+                    }
                 }
             }
             
             else if(*q_search=='1'){
-                anchor=anchor+2;
-
-                while(*anchor==' '){
-                    anchor++;
+                if(*(q_search+2)=='>'){
+                    append=1;
+                    anchor=q_search+3;
+                    while(*(anchor)==' '){
+                        anchor++;
+                    }
+                }
+                else{
+                    anchor=q_search+2;
+                    while(*anchor==' '){
+                        anchor++;
+                    }
                 }
             }
 
             else if(*q_search=='2'){
                 tar_fd=2;
-                anchor=anchor+2;
-
-                while(*anchor==' '){
-                    anchor++;
+                if(*(q_search+2)=='>'){
+                    append=1;
+                    anchor=q_search+3;
+                    while(*(anchor)==' '){
+                        anchor++;
+                    }
+                }
+                else{
+                    anchor=q_search+2;
+                    while(*anchor==' '){
+                        anchor++;
+                    }
                 }
             }
+            int flags = O_WRONLY | O_CREAT | (append ? O_APPEND : O_TRUNC);
 
             *q_search='\0';
-            int fd=open(anchor, O_WRONLY | O_CREAT | O_TRUNC, 0644);
+            int fd=open(anchor, flags, 0644);
             if(fd!=-1){
                 dup2(fd,tar_fd);
                 close(fd);
