@@ -5,6 +5,34 @@
 #include <unistd.h>
 #include <sys/wait.h>
 #include <fcntl.h>
+#include <readline/readline.h>
+
+char *generator(const char *text1, int state){
+    static char *exp_com[]={"echo","exit",NULL};
+    static int text_len;
+    static int ind;
+    char *current_word;
+
+    if(state==0){
+        ind=0;
+        text_len=strlen(text1); 
+    }
+
+    while(exp_com[ind]!=NULL){
+        current_word=exp_com[ind];
+        ind++ ;
+        if(strncmp(current_word,text1,text_len)==0){
+            return strdup(current_word);
+        }
+    }
+    return NULL;
+}
+
+char **command_completion(const char *text, int start, int end) {
+    rl_attempted_completion_over = 1; 
+    
+    return rl_completion_matches(text, generator);
+}
 
 int main(int argc, char *argv[]) {
 
@@ -12,13 +40,19 @@ int main(int argc, char *argv[]) {
   char *buffer=NULL;
   size_t size=0;
 
+  rl_attempted_completion_function = command_completion;
   while (1)
   {
 
-    printf("$ ");
-    fflush(stdout);
-    ssize_t chars_read=getline(&buffer,&size,stdin);
-    buffer[strcspn(buffer,"\n")]='\0';
+    buffer=readline("$ ");
+    if(buffer==NULL){
+        break;
+    }
+
+    if(buffer[0]=='\0'){
+        free(buffer);
+        continue;
+    }
 
     char *q_search=buffer;
     int s_flag=0;
@@ -109,12 +143,8 @@ int main(int argc, char *argv[]) {
         *q_search++;
     }
 
-    if(chars_read==-1){
-        printf("exit\n");
-        exit(0);
-    }       
-
-    else if(strncmp(buffer, "echo ", 5) == 0){
+    
+    if(strncmp(buffer, "echo ", 5) == 0){
         char *quote_find= buffer+5 ;
         int sin_flag=0;
         int dou_flag=0;
