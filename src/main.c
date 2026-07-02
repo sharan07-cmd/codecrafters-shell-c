@@ -161,7 +161,7 @@ int main(int argc, char *argv[]) {
     }
 
     while(*quote_find!='\0'){
-        // REVISED BACKSLASH CONDITION
+
         if (*quote_find == '\\') {
             quote_find++; // Move to the next char
             
@@ -199,6 +199,7 @@ int main(int argc, char *argv[]) {
         }
         quote_find++;
     }
+
     if(arg_len>0){
         arg_buffer[arg_len]='\0';
         args[argc_count]=strdup(arg_buffer);
