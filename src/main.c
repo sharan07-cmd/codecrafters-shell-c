@@ -165,19 +165,9 @@ int main(int argc, char *argv[]) {
 
     while(*quote_find!='\0'){
 
-        if (*quote_find == '\\') {
-            quote_find++; 
-            
-            
-            if (*quote_find == ' ' || *quote_find == '\\' || *quote_find == '\'' || *quote_find == '"') {
-                arg_buffer[arg_len] = *quote_find;
-            } 
-            
-            else {
-                arg_buffer[arg_len] = '\\';
-                arg_len++;
-                arg_buffer[arg_len] = *quote_find;
-            }
+        if (*quote_find == '\\' && sin_quote == 0 && doub_quote == 0) {
+            quote_find++;                        
+            arg_buffer[arg_len] = *quote_find;   
             arg_len++;
         }
 
