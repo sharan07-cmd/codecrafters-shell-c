@@ -23,6 +23,8 @@ int main(int argc, char *argv[]) {
     char *q_search=buffer;
     int s_flag=0;
     int d_flag=0;
+
+    int saved_stderr=dup(2);
     int saved_stdout=dup(1);
 
     if(strcmp(buffer,"exit")==0){
@@ -40,9 +42,10 @@ int main(int argc, char *argv[]) {
             d_flag=!d_flag;
         }
 
-        else if((*q_search=='>' || (*q_search =='1' && *(q_search+1)=='>')) && s_flag==0 && d_flag == 0 ){
+        else if((*q_search=='>' || (*q_search =='1' && *(q_search+1)=='>') ||(*q_search =='2' && *(q_search+1)=='>')) && s_flag==0 && d_flag == 0 ){
 
             char *anchor=q_search;
+            int tar_fd=1;
 
             if(*q_search=='>'){
                 anchor=q_search+1;
@@ -58,10 +61,20 @@ int main(int argc, char *argv[]) {
                     anchor++;
                 }
             }
+
+            else if(*q_search=='2'){
+                tar_fd=2;
+                anchor=anchor+2;
+
+                while(*anchor==' '){
+                    anchor++;
+                }
+            }
+
             *q_search='\0';
             int fd=open(anchor, O_WRONLY | O_CREAT | O_TRUNC, 0644);
             if(fd!=-1){
-                dup2(fd,1);
+                dup2(fd,tar_fd);
                 close(fd);
             }
             break;
@@ -290,7 +303,11 @@ int main(int argc, char *argv[]) {
             }
         }
     }
+
     dup2(saved_stdout,1);
+    dup2(saved_stderr,2);
+    close(saved_stderr);
+    close(saved_stdout);
   }
 
   free(buffer);
