@@ -39,7 +39,9 @@ char *generator(const char *text1, int state){
         path_copy=strdup(path1);
         cur_dir=strtok_r(path_copy,":",&saveptr);
         }
-
+        
+    }    
+        
         if(check_builtins==1){
             while(exp_com[builtin_index]!=NULL){
                 current_word=exp_com[builtin_index];
@@ -77,7 +79,6 @@ char *generator(const char *text1, int state){
             dir_stream=NULL;
             cur_dir=strtok_r(NULL,":",&saveptr);
         }
-    }
 
     return NULL;
 }
