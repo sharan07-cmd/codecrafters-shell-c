@@ -6,25 +6,78 @@
 #include <sys/wait.h>
 #include <fcntl.h>
 #include <readline/readline.h>
+#include <dirent.h>
 
 char *generator(const char *text1, int state){
     static char *exp_com[]={"echo","exit",NULL};
     static int text_len;
-    static int ind;
+    static int check_builtins=1;
+    static int builtin_index=0;
+    static char *path_copy=NULL;
+    static char *cur_dir=NULL;
+    static DIR *dir_stream=NULL;
+
     char *current_word;
-
+    
     if(state==0){
-        ind=0;
+        char *path1=getenv("PATH");
+        builtin_index=0;
+        check_builtins=1;
         text_len=strlen(text1); 
-    }
 
-    while(exp_com[ind]!=NULL){
-        current_word=exp_com[ind];
-        ind++ ;
-        if(strncmp(current_word,text1,text_len)==0){
-            return strdup(current_word);
+        if(path_copy!=NULL){
+        free(path_copy);
+        }
+
+        if(dir_stream!=NULL){
+            closedir(dir_stream);
+            dir_stream=NULL;
+        }
+
+        if(path1!=NULL){
+        path_copy=strdup(path1);
+        cur_dir=strtok(path_copy,":");
+        }
+
+        if(check_builtins==1){
+            while(exp_com[builtin_index]!=NULL){
+                current_word=exp_com[builtin_index];
+                builtin_index++ ;
+                if(strncmp(current_word,text1,text_len)==0){
+                    return strdup(current_word);
+                    }
+            }
+            check_builtins=0;
+        }
+
+        while(cur_dir!=NULL){
+            if(dir_stream==NULL){
+                dir_stream=opendir(cur_dir);
+
+                if(dir_stream==NULL){
+                    cur_dir=strtok(NULL,":");
+                    continue;
+                }
+            }
+            struct dirent *entry;
+            while((entry=readdir(dir_stream))!=NULL){
+
+                if(strncmp(entry->d_name,text1,text_len)==0){
+
+                    char full_path[1024];
+                    snprintf(full_path,sizeof(full_path),"%s/%s",cur_dir,entry->d_name);
+
+                    if(access(full_path,X_OK)==0){
+                        return strdup(entry->d_name);
+                    }
+                }
+            }
+            closedir(dir_stream);
+            dir_stream=NULL;
+            cur_dir=strtok(NULL,":");
         }
     }
+
     return NULL;
 }
 
