@@ -46,7 +46,7 @@ char *generator(const char *text1, int state){
                 if(strncmp(current_word,text1,text_len)==0){
                     return strdup(current_word);
                     }
-            }
+            }                          
             check_builtins=0;
         }
 
@@ -61,7 +61,7 @@ char *generator(const char *text1, int state){
             }
             struct dirent *entry;
             while((entry=readdir(dir_stream))!=NULL){
-
+                
                 if(strncmp(entry->d_name,text1,text_len)==0){
 
                     char full_path[1024];
