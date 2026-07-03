@@ -16,6 +16,7 @@ char *generator(const char *text1, int state){
     static char *path_copy=NULL;
     static char *cur_dir=NULL;
     static DIR *dir_stream=NULL;
+    static char *saveptr=NULL;
 
     char *current_word;
     
@@ -36,7 +37,7 @@ char *generator(const char *text1, int state){
 
         if(path1!=NULL){
         path_copy=strdup(path1);
-        cur_dir=strtok(path_copy,":");
+        cur_dir=strtok_r(path_copy,":",&saveptr);
         }
 
         if(check_builtins==1){
@@ -55,7 +56,7 @@ char *generator(const char *text1, int state){
                 dir_stream=opendir(cur_dir);
 
                 if(dir_stream==NULL){
-                    cur_dir=strtok(NULL,":");
+                    cur_dir=strtok_r(NULL,":",&saveptr);
                     continue;
                 }
             }
@@ -74,7 +75,7 @@ char *generator(const char *text1, int state){
             }
             closedir(dir_stream);
             dir_stream=NULL;
-            cur_dir=strtok(NULL,":");
+            cur_dir=strtok_r(NULL,":",&saveptr);
         }
     }
 
