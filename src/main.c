@@ -36,15 +36,26 @@ char *script_generator(const char *text2,int state){
         }
 
         if(target_script!=NULL){
+
             FILE *fp=popen(target_script,"r");
+
             if(fp!=NULL){
+
                 char output[1024];
-                fgets(output, sizeof(output), fp);
-                pclose(fp);
-                output[strcspn(output,"\n")]='\0';
-                return strdup(output);
+                
+                if((fgets(output, sizeof(output), fp))!=NULL){
+                    pclose(fp);
+                    output[strcspn(output,"\n")]='\0';
+                    return strdup(output);
+                }
+                
+                else{
+                    pclose(fp);
+                    printf("\x07");
+                    return NULL;
+                }
             }
-        }
+        }   
     }
     return NULL;
 }
