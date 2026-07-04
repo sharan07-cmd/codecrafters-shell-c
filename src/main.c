@@ -84,7 +84,7 @@ char *generator(const char *text1, int state){
 }
 
 char **command_completion(const char *text, int start, int end) {
-    
+
     if(start==0){
         rl_attempted_completion_over = 1; 
         return rl_completion_matches(text, generator);
@@ -296,7 +296,7 @@ int main(int argc, char *argv[]) {
     else if (strncmp(buffer, "type ", 5) == 0) {
         char *cmd = buffer + 5; 
 
-        if (strcmp(cmd, "echo") == 0 || strcmp(cmd, "exit") == 0 || strcmp(cmd, "type") == 0 || strcmp(cmd, "pwd") == 0 || strcmp(cmd,"cd")==0) {
+        if (strcmp(cmd, "echo") == 0 || strcmp(cmd, "exit") == 0 || strcmp(cmd, "type") == 0 || strcmp(cmd, "pwd") == 0 || strcmp(cmd,"cd")==0 || strcmp(cmd,"complete")==0) {
             printf("%s is a shell builtin\n", cmd);
         } 
        
