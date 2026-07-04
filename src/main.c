@@ -84,9 +84,16 @@ char *generator(const char *text1, int state){
 }
 
 char **command_completion(const char *text, int start, int end) {
-    rl_attempted_completion_over = 1; 
     
-    return rl_completion_matches(text, generator);
+    if(start==0){
+        rl_attempted_completion_over = 1; 
+        return rl_completion_matches(text, generator);
+    }
+
+    else{
+        rl_attempted_completion_over = 0;
+        return NULL;    
+    }
 }
 
 int main(int argc, char *argv[]) {
