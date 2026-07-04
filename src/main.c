@@ -294,7 +294,7 @@ int main(int argc, char *argv[]) {
 
     else if(strncmp(buffer,"complete -p ",12)==0){
         char *command=buffer+12;
-        printf("complete: %s: no completion specification",command);
+        printf("complete: %s: no completion specification\n",command);
     }
 
   
