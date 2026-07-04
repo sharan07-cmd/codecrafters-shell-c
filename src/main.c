@@ -8,6 +8,14 @@
 #include <readline/readline.h>
 #include <dirent.h>
 
+typedef struct {
+    char command[256];
+    char script_path[1024];
+} CompletionRule;
+
+CompletionRule registry[100];
+int registry_size=0;
+
 char *generator(const char *text1, int state){
     static char *exp_com[]={"echo","exit",NULL};
     static int text_len;
@@ -292,9 +300,38 @@ int main(int argc, char *argv[]) {
 
     }
 
-    else if(strncmp(buffer,"complete -p ",12)==0){
-        char *command=buffer+12;
-        printf("complete: %s: no completion specification\n",command);
+    else if(strncmp(buffer,"complete ",9)==0){
+
+        char flags[10],args1[1024],args2[1024];
+        int variables_filled;
+        
+        variables_filled=sscanf(buffer,"complete %s %s %s", flags,args1,args2);
+
+        if(strcmp(flags,"-p")==0){
+            int found=0;
+
+            for(int i=0; i<registry_size;i++){
+                if(strcmp(args1,registry[i].command)==0){
+                    printf("complete -C '%s' %s\n",registry[i].script_path,registry[i].command);
+                    found=1;
+                    break;
+                }
+            }
+
+            if(found==0){
+                printf("complete: %s: no completion specification\n",args1);
+            }
+        }
+
+        else if(strcmp(flags,"-C")==0){
+
+            if(variables_filled==3){
+
+                strcpy(registry[registry_size].script_path,args1);
+                strcpy(registry[registry_size].command,args2);
+                registry_size++ ;
+            }
+        }   
     }
 
   
