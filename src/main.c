@@ -16,6 +16,39 @@ typedef struct {
 CompletionRule registry[100];
 int registry_size=0;
 
+char *script_generator(const char *text2,int state){
+
+    char base_command[1024];
+    char *target_script=NULL;
+
+    if(state==0){
+        char temp_buffer[1024];
+        strcpy(temp_buffer,rl_line_buffer);
+        sscanf(temp_buffer,"%s",base_command);
+
+        for(int j=0;j<registry_size;j++){
+
+            if(strcmp(base_command,registry[j].command)==0){
+                target_script=registry[j].script_path;
+                break;
+
+            }
+        }
+
+        if(target_script!=NULL){
+            FILE *fp=popen(target_script,"r");
+            if(fp!=NULL){
+                char output[1024];
+                fgets(output, sizeof(output), fp);
+                pclose(fp);
+                output[strcspn(output,"\n")]='\0';
+                return strdup(output);
+            }
+        }
+    }
+    return NULL;
+}
+
 char *generator(const char *text1, int state){
     static char *exp_com[]={"echo","exit",NULL};
     static int text_len;
@@ -99,7 +132,18 @@ char **command_completion(const char *text, int start, int end) {
     }
 
     else{
-        rl_attempted_completion_over = 0;
+        char base_command[1024];
+        char temp_buffer[1024];
+
+        strcpy(temp_buffer,rl_line_buffer);
+        sscanf(temp_buffer,"%s",base_command);
+        for(int i=0;i<registry_size;i++){
+            if(strcmp(base_command,registry[i].command)==0){
+                rl_attempted_completion_over=1;
+                return rl_completion_matches(text,script_generator);
+            }
+        }
+        rl_attempted_completion_over=0;
         return NULL;    
     }
 }
