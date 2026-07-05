@@ -21,6 +21,9 @@ char *script_generator(const char *text2,int state){
     char base_command[1024];
     char *target_script=NULL;
 
+    static char script_matches[100][1024];
+    static int script_match_count = 0;
+
     if(state==0){
         char temp_buffer[1024];
         strcpy(temp_buffer,rl_line_buffer);
@@ -78,14 +81,16 @@ char *script_generator(const char *text2,int state){
             if(fp!=NULL){
 
                 char output[1024];
+                script_match_count=0;
                 
-                if((fgets(output, sizeof(output), fp))!=NULL){
+                while((fgets(output, sizeof(output), fp))!=NULL){
                     pclose(fp);
                     output[strcspn(output,"\n")]='\0';
-                    return strdup(output);
+                    strcpy(script_matches[script_match_count],output);
+                    script_match_count++ ;
                 }
                 
-                else{
+                if(script_match_count=0){
                     pclose(fp);
                     printf("\x07");
                     return NULL;
@@ -93,6 +98,10 @@ char *script_generator(const char *text2,int state){
             }
         }   
     }
+    if (state < script_match_count) {
+    return strdup(script_matches[state]);
+    }
+    
     return NULL;
 }
 
