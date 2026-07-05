@@ -93,6 +93,7 @@ char *script_generator(const char *text2,int state){
                 if(script_match_count=0){
                     pclose(fp);
                     printf("\x07");
+                    fflush(stdout);
                     return NULL;
                 }
             }
@@ -101,7 +102,7 @@ char *script_generator(const char *text2,int state){
     if (state < script_match_count) {
     return strdup(script_matches[state]);
     }
-    
+
     return NULL;
 }
 
