@@ -51,7 +51,7 @@ char *script_generator(const char *text2,int state){
                 token=strtok(NULL," ");
             }
 
-            char previous_word[1024];
+            char previous_word[1024]="";
 
             if(strlen(text2)==0){
                 if(word_count>=1){
@@ -62,10 +62,13 @@ char *script_generator(const char *text2,int state){
             else{
                 if(word_count>=2){
                     strcpy(previous_word,words[word_count-2]);
-                }
+                }   
             }
 
-            FILE *fp=popen(target_script,"r");
+            char execution_cmd[2048];
+            sprintf(execution_cmd, "%s '%s' '%s' '%s'", target_script, base_command, text2, previous_word);
+
+            FILE *fp=popen(execution_cmd,"r");
 
             if(fp!=NULL){
 
