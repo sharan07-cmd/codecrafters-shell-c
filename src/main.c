@@ -428,7 +428,29 @@ int main(int argc, char *argv[]) {
                 strcpy(registry[registry_size].command,args2);
                 registry_size++ ;
             }
-        }   
+        }
+        
+        else if(strcmp(flags,"-r")==0){
+            int found_index = -1;
+
+        
+            for (int i = 0; i < registry_size; i++) {
+                if (strcmp(registry[i].command, args1) == 0) {
+                    found_index = i;
+                    break;
+                }
+            }
+
+        
+            if (found_index != -1) {
+                for (int i = found_index; i < registry_size - 1; i++) {
+                    registry[i] = registry[i + 1]; 
+                }
+            
+            
+            registry_size--;
+            }
+        }
     }
 
   
