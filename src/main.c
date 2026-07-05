@@ -68,6 +68,11 @@ char *script_generator(const char *text2,int state){
             char execution_cmd[2048];
             sprintf(execution_cmd, "%s '%s' '%s' '%s'", target_script, base_command, text2, previous_word);
 
+            setenv("COMP_LINE", rl_line_buffer, 1);
+            char point_str[32];
+            sprintf(point_str, "%d", rl_point);
+            setenv("COMP_POINT", point_str, 1);
+
             FILE *fp=popen(execution_cmd,"r");
 
             if(fp!=NULL){
