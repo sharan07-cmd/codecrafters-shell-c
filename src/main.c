@@ -37,6 +37,34 @@ char *script_generator(const char *text2,int state){
 
         if(target_script!=NULL){
 
+            char words[50][1024];
+            int word_count=0;
+
+            char line_copy[1024];
+
+            strcpy(line_copy,rl_line_buffer);
+            char *token=strtok(line_copy," ");
+
+            while(token!=NULL && word_count<50){
+                strcpy(words[word_count],token);
+                word_count++ ;
+                token=strtok(NULL," ");
+            }
+
+            char previous_word[1024];
+
+            if(strlen(text2)==0){
+                if(word_count>=1){
+                    strcpy(previous_word,words[word_count-1]);
+                }
+            }
+
+            else{
+                if(word_count>=2){
+                    strcpy(previous_word,words[word_count-2]);
+                }
+            }
+
             FILE *fp=popen(target_script,"r");
 
             if(fp!=NULL){
