@@ -84,18 +84,14 @@ char *script_generator(const char *text2,int state){
                 script_match_count=0;
                 
                 while((fgets(output, sizeof(output), fp))!=NULL){
-                    pclose(fp);
                     output[strcspn(output,"\n")]='\0';
-                    strcpy(script_matches[script_match_count],output);
-                    script_match_count++ ;
+
+                    if(strlen(output)>0){
+                        strcpy(script_matches[script_match_count],output);
+                        script_match_count++ ;
+                    }
                 }
-                
-                if(script_match_count=0){
-                    pclose(fp);
-                    printf("\x07");
-                    fflush(stdout);
-                    return NULL;
-                }
+                pclose(fp);
             }
         }   
     }
