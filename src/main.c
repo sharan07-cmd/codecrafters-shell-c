@@ -506,6 +506,10 @@ int main(int argc, char *argv[]) {
     }
 
     else if(strncmp(buffer,"jobs",4)==0){
+        for (int i = 0; i < bg_job_count; i++) {
+            
+            printf("[%d]+  %-24s%s\n", bg_jobs[i].id, "Running", bg_jobs[i].command);
+        }
         continue;
     }
 
@@ -617,7 +621,7 @@ int main(int argc, char *argv[]) {
                 else{
                     waitpid(pid,NULL,0);
                 }
-                
+
             }
         }
     }   
