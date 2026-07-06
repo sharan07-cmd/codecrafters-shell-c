@@ -8,6 +8,16 @@
 #include <readline/readline.h>
 #include <dirent.h>
 
+// Define what a "Job" looks like
+typedef struct {
+    int id;
+    pid_t pid;
+    char command[1024]; 
+} Job;
+
+Job bg_jobs[100];
+int bg_job_count = 0;
+
 typedef struct {
     char command[256];
     char script_path[1024];
@@ -202,7 +212,7 @@ char **command_completion(const char *text, int start, int end) {
 
 int main(int argc, char *argv[]) {
  
-  int job=1;  
+  int job_id=1;  
   setbuf(stdout, NULL);
   char *buffer=NULL;
   size_t size=0;
@@ -593,13 +603,21 @@ int main(int argc, char *argv[]) {
                                 
             else if (pid > 0) {       
                 if(is_background){
-                    printf("[%d] %d\n", job, pid);
-                    job++;
-                }
+                    printf("[%d] %d\n", job_id, pid);
+                    bg_jobs[bg_job_count].id = job_id;
+                    bg_jobs[bg_job_count].pid = pid;
+                    strcpy(bg_jobs[bg_job_count].command, buffer); 
+            
+                    bg_job_count++; 
+           
+                     job_id++;
+                    
+                    }
                 
                 else{
                     waitpid(pid,NULL,0);
                 }
+                
             }
         }
     }   
