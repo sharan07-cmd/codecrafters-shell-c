@@ -201,7 +201,8 @@ char **command_completion(const char *text, int start, int end) {
 }
 
 int main(int argc, char *argv[]) {
-
+ 
+  int job=1;  
   setbuf(stdout, NULL);
   char *buffer=NULL;
   size_t size=0;
@@ -559,7 +560,7 @@ int main(int argc, char *argv[]) {
                 arg_len++;
             }
         quote_find++;
-        }
+        }   
 
         if(arg_len>0){
             arg_buffer[arg_len]='\0';
@@ -567,6 +568,15 @@ int main(int argc, char *argv[]) {
             argc_count++ ;
         }
         args[argc_count]=NULL;
+
+
+
+
+        int is_background = 0;
+        if (argc_count > 0 && strcmp(args[argc_count - 1], "&") == 0) {
+            is_background = 1;
+            args[argc_count - 1] = NULL; 
+        }
 
         if (args[0] != NULL) {
             pid_t pid = fork();       
@@ -582,7 +592,14 @@ int main(int argc, char *argv[]) {
             } 
                                 
             else if (pid > 0) {       
-                wait(NULL);           
+                if(is_background){
+                    printf("[%d] %d\n", job, pid);
+                    job++;
+                }
+                
+                else{
+                    wait(NULL);
+                }
             }
         }
     }
