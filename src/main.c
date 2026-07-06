@@ -34,7 +34,6 @@ char *script_generator(const char *text2,int state){
             if(strcmp(base_command,registry[j].command)==0){
                 target_script=registry[j].script_path;
                 break;
-
             }
         }
 
@@ -457,7 +456,7 @@ int main(int argc, char *argv[]) {
     else if (strncmp(buffer, "type ", 5) == 0) {
         char *cmd = buffer + 5; 
 
-        if (strcmp(cmd, "echo") == 0 || strcmp(cmd, "exit") == 0 || strcmp(cmd, "type") == 0 || strcmp(cmd, "pwd") == 0 || strcmp(cmd,"cd")==0 || strcmp(cmd,"complete")==0) {
+        if (strcmp(cmd, "echo") == 0 || strcmp(cmd, "exit") == 0 || strcmp(cmd, "type") == 0 || strcmp(cmd, "pwd") == 0 || strcmp(cmd,"cd")==0 || strcmp(cmd,"complete")==0 || strcmp(cmd,"jobs")==0) {
             printf("%s is a shell builtin\n", cmd);
         } 
        
@@ -493,6 +492,10 @@ int main(int argc, char *argv[]) {
             
         }
 
+    }
+
+    else if(strncmp(buffer,"jobs",4)==0){
+        continue;
     }
 
     else if (strlen(buffer) > 0) { 
