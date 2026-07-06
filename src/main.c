@@ -598,11 +598,11 @@ int main(int argc, char *argv[]) {
                 }
                 
                 else{
-                    wait(NULL);
+                    waitpid(pid,NULL,0);
                 }
             }
         }
-    }
+    }   
 
     dup2(saved_stdout,1);
     dup2(saved_stderr,2);
