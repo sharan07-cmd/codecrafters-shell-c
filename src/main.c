@@ -507,8 +507,17 @@ int main(int argc, char *argv[]) {
 
     else if(strncmp(buffer,"jobs",4)==0){
         for (int i = 0; i < bg_job_count; i++) {
+            char marker = ' '; // Default to space
             
-            printf("[%d]+  %-24s%s\n", bg_jobs[i].id, "Running", bg_jobs[i].command);
+            if (i == bg_job_count - 1) {
+                marker = '+'; // Most recent
+            } else if (i == bg_job_count - 2) {
+                marker = '-'; // Second most recent
+            }
+
+            
+            printf("[%d]%c %-24s%s\n", bg_jobs[i].id, marker, "Running", bg_jobs[i].command);
+        
         }
         continue;
     }
