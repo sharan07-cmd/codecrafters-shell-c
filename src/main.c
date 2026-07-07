@@ -742,13 +742,17 @@ int main(int argc, char *argv[]) {
 
         args[argc_count]=NULL;
         int is_pipeline=0;
-        char **right_args=NULL;
+        char **cmds[100];
+        int cmd_count=0;
+
+        cmds[0]=&args[0];
+        cmd_count=1;
 
         for(int u=0;u<argc_count;u++){
             if(strcmp(args[u],"|")==0){
                 args[u]=NULL;
 
-                right_args = &args[u+1];
+                cmds[cmd_count] = &args[u+1];
                 is_pipeline=1;
                 break;  
             }
@@ -761,49 +765,52 @@ int main(int argc, char *argv[]) {
             args[argc_count - 1] = NULL; 
         }
 
+        
+
         if (args[0] != NULL) {
 
             if(is_pipeline){
-                int fd[2];
+                int prev_fd=0;
+                for(int i=0;i<cmd_count;i++){
+                    int fd[2];
+                    if(i<cmd_count-1){
+                        if(pipe(fd)==-1){
 
-                if(pipe(fd)==-1){
-                    printf("ERROR: THE PIPELINE FAILED");
-                    continue;
-                }
-                pid_t left_pid=fork();
+                        }
+                    }
 
-                if(left_pid==0){
-                    dup2(fd[1],1);
-                    close(fd[0]);
-                    close(fd[1]);
+                    pid_t pid=fork();
+                    if(pid==0){
+                        if(prev_fd!=0){
+                            dup2(prev_fd,0);
+                            close(prev_fd);
+                        }
 
-                    execute_pipeline_builtin(args);
-                    execvp(args[0],args);
+                        if(i<cmd_count-1){
+                            dup2(fd[1],1);
+                            close(fd[0]);
+                            close(fd[1]);
+                        }
 
-                    printf("ERROR: COMMAND DOESNT EXIST\n");
-                    exit(1);
-                }
-
-                else if(left_pid>0){
-                    pid_t right_pid=fork();
-                    if(right_pid==0){
-                        dup2(fd[0],0);
-                        close(fd[0]);
-                        close(fd[1]);
-
-                        execute_pipeline_builtin(right_args);
-                        execvp(right_args[0],right_args);
-
+                        execute_pipeline_builtin(cmds[i]);
+                        execvp(cmds[i][0], cmds[i]);
                         printf("ERROR: COMMAND NOT FOUND\n");
                         exit(1);
                     }
 
-                    else if(right_pid>0){
-                        close(fd[0]);
-                        close(fd[1]);
-                        waitpid(left_pid,NULL,0);
-                        waitpid(right_pid,NULL,0);
+                    else if(pid>0){
+                        if(prev_fd!=0){
+                            close(prev_fd);
+                        }
+
+                        if(i<cmd_count-1){
+                            prev_fd=fd[0];
+                            close(fd[1]);
+                        }
                     }
+                }
+                for(int i=0;i<cmd_count;i++){
+                    wait(NULL);
                 }
             }
 
