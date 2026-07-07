@@ -65,12 +65,14 @@ char *script_generator(const char *text2,int state){
             char previous_word[1024]="";
 
             if(strlen(text2)==0){
+
                 if(word_count>=1){
                     strcpy(previous_word,words[word_count-1]);
                 }
             }
 
             else{
+
                 if(word_count>=2){
                     strcpy(previous_word,words[word_count-2]);
                 }   
@@ -103,8 +105,9 @@ char *script_generator(const char *text2,int state){
             }
         }   
     }
+
     if (state < script_match_count) {
-    return strdup(script_matches[state]);
+        return strdup(script_matches[state]);
     }
 
     return NULL;
@@ -123,13 +126,14 @@ char *generator(const char *text1, int state){
     char *current_word;
     
     if(state==0){
+
         char *path1=getenv("PATH");
         builtin_index=0;
         check_builtins=1;
         text_len=strlen(text1); 
 
         if(path_copy!=NULL){
-        free(path_copy);
+            free(path_copy);
         }
 
         if(dir_stream!=NULL){
@@ -145,18 +149,24 @@ char *generator(const char *text1, int state){
     }    
         
         if(check_builtins==1){
+
             while(exp_com[builtin_index]!=NULL){
+
                 current_word=exp_com[builtin_index];
                 builtin_index++ ;
+
                 if(strncmp(current_word,text1,text_len)==0){
                     return strdup(current_word);
-                    }
-            }                          
+                }
+            }              
+
             check_builtins=0;
         }
 
         while(cur_dir!=NULL){
+
             if(dir_stream==NULL){
+
                 dir_stream=opendir(cur_dir);
 
                 if(dir_stream==NULL){
@@ -164,7 +174,9 @@ char *generator(const char *text1, int state){
                     continue;
                 }
             }
+
             struct dirent *entry;
+
             while((entry=readdir(dir_stream))!=NULL){
                 
                 if(strncmp(entry->d_name,text1,text_len)==0){
@@ -177,6 +189,7 @@ char *generator(const char *text1, int state){
                     }
                 }
             }
+
             closedir(dir_stream);
             dir_stream=NULL;
             cur_dir=strtok_r(NULL,":",&saveptr);
@@ -198,14 +211,18 @@ char **command_completion(const char *text, int start, int end) {
 
         strcpy(temp_buffer,rl_line_buffer);
         sscanf(temp_buffer,"%s",base_command);
+
         for(int i=0;i<registry_size;i++){
+
             if(strcmp(base_command,registry[i].command)==0){
                 rl_attempted_completion_over=1;
                 return rl_completion_matches(text,script_generator);
             }
         }
+
         rl_attempted_completion_over=0;
         return NULL;    
+
     }
 }
 
@@ -218,6 +235,7 @@ int main(int argc, char *argv[]) {
 
   rl_attempted_completion_function = command_completion;
   while (1)
+  
   {
     for (int i = 0; i < bg_job_count; i++) {
             char marker = ' '; 
@@ -298,12 +316,15 @@ int main(int argc, char *argv[]) {
                 if(*(q_search+1)=='>'){
                     append=1;
                     anchor=q_search+2;
+
                     while(*(anchor)==' '){
                         anchor++;
                     }
                 }
+
                 else{
                     anchor=q_search+1;
+
                     while(*(anchor)==' '){
                         anchor++;
                     }
@@ -311,15 +332,19 @@ int main(int argc, char *argv[]) {
             }
             
             else if(*q_search=='1'){
+
                 if(*(q_search+2)=='>'){
                     append=1;
                     anchor=q_search+3;
+
                     while(*(anchor)==' '){
                         anchor++;
                     }
                 }
+
                 else{
                     anchor=q_search+2;
+
                     while(*anchor==' '){
                         anchor++;
                     }
@@ -328,28 +353,35 @@ int main(int argc, char *argv[]) {
 
             else if(*q_search=='2'){
                 tar_fd=2;
+
                 if(*(q_search+2)=='>'){
                     append=1;
                     anchor=q_search+3;
+
                     while(*(anchor)==' '){
                         anchor++;
                     }
                 }
+
                 else{
                     anchor=q_search+2;
+
                     while(*anchor==' '){
                         anchor++;
                     }
                 }
             }
+
             int flags = O_WRONLY | O_CREAT | (append ? O_APPEND : O_TRUNC);
 
             *q_search='\0';
             int fd=open(anchor, flags, 0644);
+
             if(fd!=-1){
                 dup2(fd,tar_fd);
                 close(fd);
             }
+            
             break;
         }
         *q_search++;
@@ -364,7 +396,9 @@ int main(int argc, char *argv[]) {
         while(*quote_find==' '){
             quote_find++;
         }
+
         while(*quote_find!='\0'){
+
             if (*quote_find == '\\' && sin_flag == 0 && dou_flag == 0) {
                 quote_find++;
                 putchar(*quote_find);
@@ -453,6 +487,7 @@ int main(int argc, char *argv[]) {
             int found=0;
 
             for(int i=0; i<registry_size;i++){
+
                 if(strcmp(args1,registry[i].command)==0){
                     printf("complete -C '%s' %s\n",registry[i].script_path,registry[i].command);
                     found=1;
@@ -480,6 +515,7 @@ int main(int argc, char *argv[]) {
 
         
             for (int i = 0; i < registry_size; i++) {
+
                 if (strcmp(registry[i].command, args1) == 0) {
                     found_index = i;
                     break;
@@ -488,10 +524,10 @@ int main(int argc, char *argv[]) {
 
         
             if (found_index != -1) {
+
                 for (int i = found_index; i < registry_size - 1; i++) {
                     registry[i] = registry[i + 1]; 
                 }
-            
             
             registry_size--;
             }
@@ -631,10 +667,12 @@ int main(int argc, char *argv[]) {
             }
 
             else if(*quote_find==' ' && sin_quote==0 && doub_quote==0){
+
                 arg_buffer[arg_len]='\0';
                 args[argc_count]=strdup(arg_buffer);
                 argc_count++;
                 arg_len=0;
+
                 while(*(quote_find+1)==' '){
                     quote_find++;
                 }
@@ -645,63 +683,132 @@ int main(int argc, char *argv[]) {
                 arg_len++;
             }
         quote_find++;
-        }   
+        }
+        
 
         if(arg_len>0){
+
             arg_buffer[arg_len]='\0';
             args[argc_count]=strdup(arg_buffer);
             argc_count++ ;
         }
+
         args[argc_count]=NULL;
+        int is_pipeline=0;
+        char **right_args=NULL;
+
+        for(int u=0;u<argc_count;u++){
+            if(strcmp(args[u],"|")==0){
+                args[u]=NULL;
+
+                right_args = &args[u+1];
+                is_pipeline=1;
+                break;  
+            }
+        }
 
         int is_background = 0;
+
         if (argc_count > 0 && strcmp(args[argc_count - 1], "&") == 0) {
             is_background = 1;
             args[argc_count - 1] = NULL; 
         }
 
         if (args[0] != NULL) {
-            pid_t pid = fork();       
-            if (pid < 0) {           
-                printf("Error: Failed to fork process.\n");
-            } 
 
-            else if (pid == 0) {     
-                execvp(args[0], args);
-                    
-                printf("%s: command not found\n", args[0]); 
-                exit(1);
-            } 
-                                
-            else if (pid > 0) {       
-                if(is_background){
-                    if(bg_job_count==0){
-                        job_id=1;
-                    }
-                    
-                    else{
-                        int max_id=0;
-                        for(int k=0; k<bg_job_count;k++){
-                            if (bg_jobs[k].id> max_id){
-                                max_id=bg_jobs[k].id;
-                            }
-                        }
-                        job_id=max_id+1;
-                    }
-                    printf("[%d] %d\n", job_id, pid);
-                    bg_jobs[bg_job_count].id = job_id;
-                    bg_jobs[bg_job_count].pid = pid;
-                    strcpy(bg_jobs[bg_job_count].command, buffer); 
-            
-                    bg_job_count++; 
-                    
+            if(is_pipeline){
+                int fd[2];
+
+                if(pipe(fd)==-1){
+                    printf("ERROR: THE PIPELINE FAILED");
+                    continue;
                 }
-                
-                else{
-                    waitpid(pid,NULL,0);
+                pid_t left_pid=fork();
+
+                if(left_pid==0){
+                    dup2(fd[1],1);
+                    close(fd[0]);
+                    close(fd[1]);
+
+                    execvp(args[0],args);
+
+                    printf("ERROR: COMMAND DOESNT EXIST\n");
+                    exit(1);
                 }
 
+                else if(left_pid>0){
+                    pid_t right_pid=fork();
+                    if(right_pid==0){
+                        dup2(fd[0],0);
+                        close(fd[0]);
+                        close(fd[1]);
+
+                        execvp(right_args[0],right_args);
+
+                        printf("ERROR: COMMAND NOT FOUND\n");
+                        exit(1);
+                    }
+
+                    else if(right_pid>0){
+                        close(fd[0]);
+                        close(fd[1]);
+                        waitpid(left_pid,NULL,0);
+                        waitpid(right_pid,NULL,0);
+                    }
+                }
             }
+
+            else{
+
+                pid_t pid = fork();       
+
+                if (pid < 0) {           
+                    printf("Error: Failed to fork process.\n");
+                } 
+
+                else if (pid == 0) {     
+                    execvp(args[0], args);
+                    
+                    printf("%s: command not found\n", args[0]); 
+                    exit(1);
+                } 
+                                
+                else if (pid > 0) {       
+
+                    if(is_background){
+
+                        if(bg_job_count==0){
+                            job_id=1;
+                        }
+                    
+                        else{
+                            int max_id=0;
+
+                            for(int k=0; k<bg_job_count;k++){
+
+                                if (bg_jobs[k].id> max_id){
+                                    max_id=bg_jobs[k].id;
+                                }
+                            }
+
+                            job_id=max_id+1;
+                        }
+
+                        printf("[%d] %d\n", job_id, pid);
+                        bg_jobs[bg_job_count].id = job_id;
+                        bg_jobs[bg_job_count].pid = pid;
+                        strcpy(bg_jobs[bg_job_count].command, buffer); 
+            
+                        bg_job_count++; 
+                    
+                    }
+
+                    else{
+                        waitpid(pid,NULL,0);
+                    }
+                }
+            }
+
         }
     }   
 
