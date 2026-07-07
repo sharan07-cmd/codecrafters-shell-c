@@ -435,7 +435,7 @@ int main(int argc, char *argv[]) {
     }
 
     
-    if(strncmp(buffer, "echo ", 5) == 0){
+    if(strncmp(buffer, "echo ", 5) == 0 && strchr(buffer,'|')==NULL){
         char *quote_find= buffer+5 ;
         int sin_flag=0;
         int dou_flag=0;
@@ -582,7 +582,7 @@ int main(int argc, char *argv[]) {
     }
 
   
-    else if (strncmp(buffer, "type ", 5) == 0) {
+    else if (strncmp(buffer, "type ", 5) == 0 && strchr(buffer,'|')==NULL) {
         char *cmd = buffer + 5; 
 
         if (strcmp(cmd, "echo") == 0 || strcmp(cmd, "exit") == 0 || strcmp(cmd, "type") == 0 || strcmp(cmd, "pwd") == 0 || strcmp(cmd,"cd")==0 || strcmp(cmd,"complete")==0 || strcmp(cmd,"jobs")==0) {
