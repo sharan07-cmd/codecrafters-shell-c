@@ -344,6 +344,9 @@ int main(int argc, char *argv[]) {
             }
         }
 
+   printf("$ ");
+   fflush(stdout);
+   
    char buffer[1024];
    
    int history_idx = history_count; 
