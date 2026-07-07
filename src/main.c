@@ -360,7 +360,6 @@ int main(int argc, char *argv[]) {
     read(STDIN_FILENO, &c, 1); 
 
     if (c == '\n') {
-        write(STDOUT_FILENO, "\n", 1);
         buffer[buf_len] = '\0';
         break; 
     } 
@@ -396,7 +395,6 @@ int main(int argc, char *argv[]) {
     else { 
         buffer[buf_len] = c;
         buf_len++;
-        write(STDOUT_FILENO, &c, 1);
     }
 
  }
