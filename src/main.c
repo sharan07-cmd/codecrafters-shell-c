@@ -753,6 +753,7 @@ int main(int argc, char *argv[]) {
                 args[u]=NULL;
 
                 cmds[cmd_count] = &args[u+1];
+                cmd_count++;
                 is_pipeline=1;
             }
         }
