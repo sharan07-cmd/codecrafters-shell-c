@@ -8,7 +8,6 @@
 #include <readline/readline.h>
 #include <dirent.h>
 
-// Define what a "Job" looks like
 typedef struct {
     int id;
     pid_t pid;
@@ -507,17 +506,44 @@ int main(int argc, char *argv[]) {
 
     else if(strncmp(buffer,"jobs",4)==0){
         for (int i = 0; i < bg_job_count; i++) {
-            char marker = ' '; // Default to space
+            char marker = ' '; 
             
             if (i == bg_job_count - 1) {
-                marker = '+'; // Most recent
-            } else if (i == bg_job_count - 2) {
-                marker = '-'; // Second most recent
+                marker = '+'; 
+            } 
+            
+            else if (i == bg_job_count - 2) {
+                marker = '-'; 
             }
 
+            int status;
+            int result=waitpid(bg_jobs[i].pid,&status,WNOHANG);
             
-            printf("[%d]%c %-24s%s\n", bg_jobs[i].id, marker, "Running", bg_jobs[i].command);
-        
+            if(result==0){
+                printf("[%d]%c %-24s%s\n", bg_jobs[i].id, marker, "Running", bg_jobs[i].command);
+            }
+
+            else if(result>0){
+                int length=0;
+                length=strlen(bg_jobs[i].command);
+
+                if(bg_jobs[i].command[length-1]=='&'){
+                    bg_jobs[i].command[length-1]='\0';
+
+                    if(bg_jobs[i].command[length-2]==' '){
+                        bg_jobs[i].command[length-2]='\0';
+                    }
+                }
+
+                printf("[%d]%c %-24s%s\n", bg_jobs[i].id, marker, "Done", bg_jobs[i].command);
+
+                for(int j=i; j<bg_job_count-1;j++){
+                    bg_jobs[j]=bg_jobs[j+1];
+                }
+
+                bg_job_count--;
+                i--;
+            }
         }
         continue;
     }
@@ -592,9 +618,6 @@ int main(int argc, char *argv[]) {
         }
         args[argc_count]=NULL;
 
-
-
-
         int is_background = 0;
         if (argc_count > 0 && strcmp(args[argc_count - 1], "&") == 0) {
             is_background = 1;
@@ -623,9 +646,9 @@ int main(int argc, char *argv[]) {
             
                     bg_job_count++; 
            
-                     job_id++;
+                    job_id++;
                     
-                    }
+                }
                 
                 else{
                     waitpid(pid,NULL,0);
