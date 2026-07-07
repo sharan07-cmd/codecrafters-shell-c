@@ -297,6 +297,9 @@ char **command_completion(const char *text, int start, int end) {
 }
 
 int main(int argc, char *argv[]) {
+
+    enable_raw_mode();
+    setbuf(stdout,NULL);
  
   int job_id;  
   setbuf(stdout, NULL);
