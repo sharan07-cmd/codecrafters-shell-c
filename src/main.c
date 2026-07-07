@@ -219,6 +219,42 @@ int main(int argc, char *argv[]) {
   rl_attempted_completion_function = command_completion;
   while (1)
   {
+    for (int i = 0; i < bg_job_count; i++) {
+            char marker = ' '; 
+            
+            if (i == bg_job_count - 1) {
+                marker = '+'; 
+            } 
+            
+            else if (i == bg_job_count - 2) {
+                marker = '-'; 
+            }
+
+            int status;
+            int result=waitpid(bg_jobs[i].pid,&status,WNOHANG);
+
+            if(result>0){
+                int length=0;
+                length=strlen(bg_jobs[i].command);
+
+                if(bg_jobs[i].command[length-1]=='&'){
+                    bg_jobs[i].command[length-1]='\0';
+
+                    if(bg_jobs[i].command[length-2]==' '){
+                        bg_jobs[i].command[length-2]='\0';
+                    }
+                }
+
+                printf("[%d]%c %-24s%s\n", bg_jobs[i].id, marker, "Done", bg_jobs[i].command);
+
+                for(int j=i; j<bg_job_count-1;j++){
+                    bg_jobs[j]=bg_jobs[j+1];
+                }
+
+                bg_job_count--;
+                i--;
+            }
+        }
 
     buffer=readline("$ ");
     if(buffer==NULL){
