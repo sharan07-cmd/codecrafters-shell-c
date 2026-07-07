@@ -17,6 +17,9 @@ typedef struct {
 Job bg_jobs[100];
 int bg_job_count = 0;
 
+static char history[1000][1024];
+static int history_count=0;
+
 typedef struct {
     char command[256];
     char script_path[1024];
@@ -34,12 +37,14 @@ void execute_pipeline_builtin(char **cmd_args) {
         printf("\n");
         exit(0);
     } 
+
     else if (strcmp(cmd_args[0], "type") == 0) {
         if (cmd_args[1] != NULL) {
             char *cmd = cmd_args[1];
             if (strcmp(cmd, "echo") == 0 || strcmp(cmd, "exit") == 0 || strcmp(cmd, "type") == 0 || strcmp(cmd, "pwd") == 0 || strcmp(cmd,"cd")==0 || strcmp(cmd,"complete")==0 || strcmp(cmd,"jobs")==0) {
                 printf("%s is a shell builtin\n", cmd);
-            } else {
+            }
+            else {
                 char *path_env = getenv("PATH");
                 int found = 0;
                 if (path_env != NULL) {
@@ -61,6 +66,7 @@ void execute_pipeline_builtin(char **cmd_args) {
             }
         }
         exit(0);
+
     } 
     else if (strcmp(cmd_args[0], "pwd") == 0) {
         char cwd[1024];
@@ -330,6 +336,9 @@ int main(int argc, char *argv[]) {
         free(buffer);
         continue;
     }
+
+    strcpy(history[history_count],buffer);
+    history_count++;
 
     char *q_search=buffer;
     int s_flag=0;
@@ -621,6 +630,13 @@ int main(int argc, char *argv[]) {
             
         }
 
+    }
+
+    else if(strncmp(buffer,"history",7)==0){
+        for(int i=0;i<history_count;i++){
+            printf("%5d  %s\n", i + 1, history[i]);
+        }
+        return 2;
     }
 
     else if(strncmp(buffer,"jobs",4)==0){
