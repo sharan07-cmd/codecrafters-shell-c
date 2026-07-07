@@ -633,7 +633,18 @@ int main(int argc, char *argv[]) {
     }
 
     else if(strncmp(buffer,"history",7)==0){
-        for(int i=0;i<history_count;i++){
+        int n=history_count;
+
+        if(buffer[7]==' '){
+            n=atoi(&buffer[8]);
+        }
+
+        int start_index= history_count-n;
+        if(start_index<0){
+            start_index=0;
+        }
+
+        for(int i=start_index;i<history_count;i++){
             printf("%5d  %s\n", i + 1, history[i]);
         }
         continue;
