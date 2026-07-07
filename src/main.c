@@ -382,12 +382,10 @@ int main(int argc, char *argv[]) {
             
             if (history_idx > 0) {
                 history_idx--;
-                     
-                write(STDOUT_FILENO, "\033[2K\r$ ", 7);       
+                          
                 strcpy(buffer, history[history_idx]);
                 buf_len = strlen(buffer);
-                        
-                write(STDOUT_FILENO, buffer, buf_len);
+                    
             }
         }
     } 
