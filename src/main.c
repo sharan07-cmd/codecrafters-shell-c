@@ -3,6 +3,7 @@
 #include <string.h>
 #include <sys/types.h>
 #include <unistd.h>
+#include <termios.h>
 #include <sys/wait.h>
 #include <fcntl.h>
 #include <readline/readline.h>
@@ -27,6 +28,22 @@ typedef struct {
 
 CompletionRule registry[100];
 int registry_size=0;
+
+struct termios orig_termios;
+
+void disable_raw_mode() {
+    tcsetattr(STDIN_FILENO, TCSAFLUSH, &orig_termios);
+}
+
+void enable_raw_mode() {
+    tcgetattr(STDIN_FILENO, &orig_termios);
+    atexit(disable_raw_mode); 
+    
+    struct termios raw = orig_termios;
+    raw.c_lflag &= ~(ICANON | ECHO); 
+    
+    tcsetattr(STDIN_FILENO, TCSAFLUSH, &raw);
+}
 
 void execute_pipeline_builtin(char **cmd_args) {
     if (strcmp(cmd_args[0], "echo") == 0) {
@@ -327,16 +344,57 @@ int main(int argc, char *argv[]) {
             }
         }
 
-    buffer=readline("$ ");
-    if(buffer==NULL){
-        break;
+   char buffer[1024];
+   
+   int history_idx = history_count; 
+   int buf_len = 0;
+   buffer[0] = '\0';
+   while (1) {
+    char c;
+    read(STDIN_FILENO, &c, 1); // Read exactly 1 byte instantly
+
+    if (c == '\n') {
+        write(STDOUT_FILENO, "\n", 1);
+        buffer[buf_len] = '\0';
+        break; // User pressed Enter, break out and execute the buffer!
+    } 
+    
+    else if (c == 127) { 
+        
+        if (buf_len > 0) {
+            buf_len--;
+            write(STDOUT_FILENO, "\b \b", 3);
+        }
+    } 
+    
+    else if (c == '\033') { 
+    
+        char seq[2];
+        read(STDIN_FILENO, &seq[0], 1);
+        read(STDIN_FILENO, &seq[1], 1);
+                
+        if (seq[0] == '[' && seq[1] == 'A') {
+            
+            if (history_idx > 0) {
+                history_idx--;
+                     
+                write(STDOUT_FILENO, "\033[2K\r$ ", 7);       
+                strcpy(buffer, history[history_idx]);
+                buf_len = strlen(buffer);
+                        
+                write(STDOUT_FILENO, buffer, buf_len);
+            }
+        }
+    } 
+
+    else { 
+        buffer[buf_len] = c;
+        buf_len++;
+        write(STDOUT_FILENO, &c, 1);
     }
 
-    if(buffer[0]=='\0'){
-        free(buffer);
-        continue;
-    }
-
+ }
+        
     strcpy(history[history_count],buffer);
     history_count++;
 
