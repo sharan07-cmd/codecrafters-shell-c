@@ -346,7 +346,7 @@ int main(int argc, char *argv[]) {
 
    printf("$ ");
    fflush(stdout);
-   
+
    char buffer[1024];
    
    int history_idx = history_count; 
@@ -354,12 +354,11 @@ int main(int argc, char *argv[]) {
    buffer[0] = '\0';
    while (1) {
     char c;
-    read(STDIN_FILENO, &c, 1); // Read exactly 1 byte instantly
+    read(STDIN_FILENO, &c, 1); 
 
     if (c == '\n') {
-        write(STDOUT_FILENO, "\n", 1);
         buffer[buf_len] = '\0';
-        break; // User pressed Enter, break out and execute the buffer!
+        break; 
     } 
     
     else if (c == 127) { 
@@ -393,7 +392,6 @@ int main(int argc, char *argv[]) {
     else { 
         buffer[buf_len] = c;
         buf_len++;
-        write(STDOUT_FILENO, &c, 1);
     }
 
  }
