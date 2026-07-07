@@ -211,7 +211,7 @@ char **command_completion(const char *text, int start, int end) {
 
 int main(int argc, char *argv[]) {
  
-  int job_id=1;  
+  int job_id;  
   setbuf(stdout, NULL);
   char *buffer=NULL;
   size_t size=0;
@@ -675,14 +675,25 @@ int main(int argc, char *argv[]) {
                                 
             else if (pid > 0) {       
                 if(is_background){
+                    if(bg_job_count==0){
+                        job_id=1;
+                    }
+                    
+                    else{
+                        int max_id=0;
+                        for(int k=0; k<bg_job_count;k++){
+                            if (bg_jobs[k].id> max_id){
+                                max_id=bg_jobs[k].id;
+                            }
+                        }
+                        job_id=max_id+1;
+                    }
                     printf("[%d] %d\n", job_id, pid);
                     bg_jobs[bg_job_count].id = job_id;
                     bg_jobs[bg_job_count].pid = pid;
                     strcpy(bg_jobs[bg_job_count].command, buffer); 
             
                     bg_job_count++; 
-           
-                    job_id++;
                     
                 }
                 
