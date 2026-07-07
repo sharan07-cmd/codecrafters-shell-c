@@ -25,6 +25,166 @@ typedef struct {
 CompletionRule registry[100];
 int registry_size=0;
 
+int execute_main_builtin(char *buffer) {
+    if (strcmp(buffer, "exit") == 0) {
+        return 1; // Signal main to break
+    }
+
+    else if (strncmp(buffer, "echo ", 5) == 0) {
+        char *quote_find = buffer + 5;
+        int sin_flag = 0;
+        int dou_flag = 0;
+
+        while (*quote_find == ' ') quote_find++;
+
+        while (*quote_find != '\0') {
+            if (*quote_find == '\\' && sin_flag == 0 && dou_flag == 0) {
+                quote_find++;
+                putchar(*quote_find);
+            } else if (*quote_find == '\\' && dou_flag == 1) {
+                if (*(quote_find + 1) == '"' || *(quote_find + 1) == '\\') {
+                    quote_find++;
+                    putchar(*quote_find);
+                } else {
+                    putchar(*quote_find);
+                }
+            } else if (*quote_find == '\'' && dou_flag == 0) {
+                sin_flag = !sin_flag;
+            } else if (*quote_find == '"' && sin_flag == 0) {
+                dou_flag = !dou_flag;
+            } else if (*quote_find == ' ' && sin_flag == 0 && dou_flag == 0) {
+                putchar(' ');
+                while (*(quote_find + 1) == ' ') quote_find++;
+            } else {
+                putchar(*quote_find);
+            }
+            quote_find++;
+        }
+        putchar('\n');
+        return 2; // Signal main that it was handled
+    }
+
+    else if (strcmp(buffer, "pwd") == 0) {
+        char cwd[1024];
+        if (getcwd(cwd, sizeof(cwd)) != NULL) {
+            printf("%s\n", cwd);
+        } else {
+            printf("ERROR FINDING THE DIRECTORY\n");
+        }
+        return 2;
+    }
+
+    else if (strncmp(buffer, "cd ", 3) == 0) {
+        char *target_dir = buffer + 3;
+        if (strcmp(target_dir, "~") == 0) {
+            char *home_dir = getenv("HOME");
+            if (home_dir != NULL) chdir(home_dir);
+            else printf("cd: HOME NOT SET\n");
+        } else if (chdir(buffer + 3) != 0) {
+            printf("cd: %s: No such file or directory\n", buffer + 3);
+        }
+        return 2;
+    }
+
+    else if (strncmp(buffer, "complete ", 9) == 0) {
+        char flags[10], args1[1024], args2[1024];
+        int variables_filled = sscanf(buffer, "complete %s %s %s", flags, args1, args2);
+
+        if (strcmp(flags, "-p") == 0) {
+            int found = 0;
+            for (int i = 0; i < registry_size; i++) {
+                if (strcmp(args1, registry[i].command) == 0) {
+                    printf("complete -C '%s' %s\n", registry[i].script_path, registry[i].command);
+                    found = 1;
+                    break;
+                }
+            }
+            if (found == 0) printf("complete: %s: no completion specification\n", args1);
+        } else if (strcmp(flags, "-C") == 0) {
+            if (variables_filled == 3) {
+                strcpy(registry[registry_size].script_path, args1);
+                strcpy(registry[registry_size].command, args2);
+                registry_size++;
+            }
+        } else if (strcmp(flags, "-r") == 0) {
+            int found_index = -1;
+            for (int i = 0; i < registry_size; i++) {
+                if (strcmp(registry[i].command, args1) == 0) {
+                    found_index = i;
+                    break;
+                }
+            }
+            if (found_index != -1) {
+                for (int i = found_index; i < registry_size - 1; i++) {
+                    registry[i] = registry[i + 1];
+                }
+                registry_size--;
+            }
+        }
+        return 2;
+    }
+
+    else if (strncmp(buffer, "type ", 5) == 0) {
+        char *cmd = buffer + 5;
+        if (strcmp(cmd, "echo") == 0 || strcmp(cmd, "exit") == 0 || strcmp(cmd, "type") == 0 || strcmp(cmd, "pwd") == 0 || strcmp(cmd, "cd") == 0 || strcmp(cmd, "complete") == 0 || strcmp(cmd, "jobs") == 0) {
+            printf("%s is a shell builtin\n", cmd);
+        } else {
+            char *path_env = getenv("PATH");
+            int found = 0;
+            if (path_env != NULL) {
+                char *path_copy = malloc(strlen(path_env) + 1);
+                strcpy(path_copy, path_env);
+                char *dir = strtok(path_copy, ":");
+                while (dir != NULL) {
+                    char file_path[1024];
+                    snprintf(file_path, sizeof(file_path), "%s/%s", dir, cmd);
+                    if (access(file_path, X_OK) == 0) {
+                        printf("%s is %s\n", cmd, file_path);
+                        found = 1;
+                        break;
+                    }
+                    dir = strtok(NULL, ":");
+                }
+                free(path_copy);
+            }
+            if (found == 0) printf("%s: not found\n", cmd);
+        }
+        return 2;
+    }
+
+    else if (strncmp(buffer, "jobs", 4) == 0) {
+        for (int i = 0; i < bg_job_count; i++) {
+            char marker = ' ';
+            if (i == bg_job_count - 1) marker = '+';
+            else if (i == bg_job_count - 2) marker = '-';
+
+            int status;
+            int result = waitpid(bg_jobs[i].pid, &status, WNOHANG);
+            
+            if (result == 0) {
+                printf("[%d]%c %-24s%s\n", bg_jobs[i].id, marker, "Running", bg_jobs[i].command);
+            } else if (result > 0) {
+                int length = strlen(bg_jobs[i].command);
+                if (bg_jobs[i].command[length - 1] == '&') {
+                    bg_jobs[i].command[length - 1] = '\0';
+                    if (bg_jobs[i].command[length - 2] == ' ') {
+                        bg_jobs[i].command[length - 2] = '\0';
+                    }
+                }
+                printf("[%d]%c %-24s%s\n", bg_jobs[i].id, marker, "Done", bg_jobs[i].command);
+                for (int j = i; j < bg_job_count - 1; j++) {
+                    bg_jobs[j] = bg_jobs[j + 1];
+                }
+                bg_job_count--;
+                i--;
+            }
+        }
+        return 2;
+    }
+
+    return 0; // Not a built-in command
+}
+
 char *script_generator(const char *text2,int state){
 
     char base_command[1024];
@@ -730,6 +890,7 @@ int main(int argc, char *argv[]) {
                     close(fd[0]);
                     close(fd[1]);
 
+                    execute_pipeline_builtin(args);
                     execvp(args[0],args);
 
                     printf("ERROR: COMMAND DOESNT EXIST\n");
@@ -743,6 +904,7 @@ int main(int argc, char *argv[]) {
                         close(fd[0]);
                         close(fd[1]);
 
+                        execute_pipeline_builtin(right_args);
                         execvp(right_args[0],right_args);
 
                         printf("ERROR: COMMAND NOT FOUND\n");
