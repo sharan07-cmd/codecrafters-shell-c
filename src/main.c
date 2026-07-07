@@ -754,7 +754,6 @@ int main(int argc, char *argv[]) {
 
                 cmds[cmd_count] = &args[u+1];
                 is_pipeline=1;
-                break;  
             }
         }
 
@@ -809,7 +808,7 @@ int main(int argc, char *argv[]) {
                         }
                     }
                 }
-                
+
                 for(int i=0;i<cmd_count;i++){
                     wait(NULL);
                 }
