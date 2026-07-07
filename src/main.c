@@ -636,7 +636,7 @@ int main(int argc, char *argv[]) {
         for(int i=0;i<history_count;i++){
             printf("%5d  %s\n", i + 1, history[i]);
         }
-        return 2;
+        continue;
     }
 
     else if(strncmp(buffer,"jobs",4)==0){
