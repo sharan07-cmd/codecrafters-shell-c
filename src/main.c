@@ -343,7 +343,7 @@ int main(int argc, char *argv[]) {
 
 
     add_history(buffer);
-        
+
     char *q_search=buffer;
     int s_flag=0;
     int d_flag=0;
@@ -638,6 +638,38 @@ int main(int argc, char *argv[]) {
 
     else if(strncmp(buffer,"history",7)==0){
         int n=history_count;
+
+        if(strncmp(&buffer[8],"-r ",3)==0){
+
+            char *fpath=&buffer[11];
+            FILE *file_ptr=fopen(fpath,"r");
+
+            if(file_ptr!=NULL){
+
+                char file_line[1024];
+
+                while(fgets(file_line,sizeof(file_line),file_ptr)!=NULL){
+                    int line_len=strlen(file_line);
+
+                    if(file_line[line_len-1]=='\n' && line_len>0){
+                        file_line[line_len-1]='\0';
+                        line_len--;
+                    }
+
+                    if(line_len==0){
+                        continue;
+                    }
+
+                    else{
+                        strcpy(history[history_count],file_line);
+                        history_count++;
+                        add_history(file_line);
+                    }
+                }
+                fclose(file_ptr);
+                continue;   
+            }
+        }
 
         if(buffer[7]==' '){
             n=atoi(&buffer[8]);
