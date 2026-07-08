@@ -980,25 +980,43 @@ int main(int argc, char *argv[]) {
         args[argc_count]=NULL;
 
         for (int i = 0; args[i] != NULL; i++) {
-           
-            if (args[i][0] == '$') {
+            char *dollar_ptr;
+            
+            while ((dollar_ptr = strchr(args[i], '$')) != NULL) {
                 
-                char *target_var = &args[i][1]; // Skip the '$'
-                int found = 0;
+                char *var_start = dollar_ptr + 1;
+                char *var_end = var_start;
+                
+                while (isalnum(*var_end) || *var_end == '_') {
+                    var_end++;
+                }
 
-               
+                if (var_start == var_end) {
+                    break;
+                }
+
+                
+                char target_var[256] = {0};
+                strncpy(target_var, var_start, var_end - var_start);
+
+                
+                char *replacement_value = ""; 
                 for (int j = 0; j < shell_var_count; j++) {
                     if (strcmp(shell_vars[j].name, target_var) == 0) {
-                        // Swap the pointer to the stored value!
-                        args[i] = shell_vars[j].value; 
-                        found = 1;
+                        replacement_value = shell_vars[j].value;
                         break;
                     }
                 }
+
+                char *new_arg = malloc(1024);
+                memset(new_arg, 0, 1024);
                 
-                if (!found) {
-                    args[i] = ""; 
-                }
+                strncat(new_arg, args[i], dollar_ptr - args[i]); 
+                strcat(new_arg, replacement_value);              
+                strcat(new_arg, var_end);                        
+                
+                
+                args[i] = new_arg;
             }
         }
         
