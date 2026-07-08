@@ -289,27 +289,31 @@ int main(int argc, char *argv[]) {
   size_t size=0;
 
   char *envhome=getenv("HISTFILE");
-  FILE *fp=fopen(envhome,"r");
-  if(fp!=NULL){
-    char file_line[1024];
+  if(envhome!=NULL){
+    FILE *fp=fopen(envhome,"r");
+    if(fp!=NULL){
+        char file_line[1024];
 
-    while(fgets(file_line,sizeof(file_line),fp)!=NULL){
-        int line_len=strlen(file_line);
+        while(fgets(file_line,sizeof(file_line),fp)!=NULL){
+            int line_len=strlen(file_line);
 
-        if(file_line[line_len-1]=='\n' && line_len>0){
-            file_line[line_len-1]='\0';
-            line_len--;
+            if( line_len>0 && file_line[line_len-1]=='\n'){
+                file_line[line_len-1]='\0';
+                line_len--;
+            }
+
+            if(line_len==0){
+                continue;
+            }
+
+            else{
+                strcpy(history[history_count],file_line);
+                history_count++;
+                add_history(file_line);
+            }
         }
-
-        if(line_len==0){
-            continue;
-        }
-
-        else{
-            strcpy(history[history_count],file_line);
-            history_count++;
-            add_history(file_line);
-        }
+        last_saved_index=history_count;
+        fclose(fp);
     }
   }
   rl_attempted_completion_function = command_completion;
@@ -1010,8 +1014,21 @@ int main(int argc, char *argv[]) {
     dup2(saved_stderr,2);
     close(saved_stderr);
     close(saved_stdout);
+}
+char *envhome_exit = getenv("HISTFILE");
+  if (envhome_exit != NULL) {
+    FILE *fp_out = fopen(envhome_exit, "w");
+    if (fp_out != NULL) {
+        if(fp_out!=NULL){
+                for(int i=0;i<history_count;i++){
+                    fprintf(fp_out, "%s\n", history[i]);
+                }
+                fclose(fp_out);
+        }
+    }
   }
-
+  
   free(buffer);
+    
   return 0;
 }
