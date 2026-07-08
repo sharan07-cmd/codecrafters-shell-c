@@ -683,8 +683,6 @@ int main(int argc, char *argv[]) {
                 len--;
             }
 
-            char *var_name = &buffer[11];
-
             int found = 0;
             for (int i = 0; i < shell_var_count; i++) {
                 if (strcmp(shell_vars[i].name, var_name) == 0) {
