@@ -288,6 +288,30 @@ int main(int argc, char *argv[]) {
   char *buffer=NULL;
   size_t size=0;
 
+  char *envhome=getenv("HISTFILE");
+  FILE *fp=fopen(envhome,"r");
+  if(fp!=NULL){
+    char file_line[1024];
+
+    while(fgets(file_line,sizeof(file_line),fp)!=NULL){
+        int line_len=strlen(file_line);
+
+        if(file_line[line_len-1]=='\n' && line_len>0){
+            file_line[line_len-1]='\0';
+            line_len--;
+        }
+
+        if(line_len==0){
+            continue;
+        }
+
+        else{
+            strcpy(history[history_count],file_line);
+            history_count++;
+            add_history(file_line);
+        }
+    }
+  }
   rl_attempted_completion_function = command_completion;
   while (1)
   
