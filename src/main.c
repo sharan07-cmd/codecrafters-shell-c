@@ -1038,6 +1038,16 @@ int main(int argc, char *argv[]) {
                 args[i] = new_arg;
             }
         }
+
+        for (int i = 0; args[i] != NULL; i++) {
+            if (strlen(args[i]) == 0) {
+            
+                for (int k = i; args[k] != NULL; k++) {
+                    args[k] = args[k + 1];
+                }
+                i--; 
+            }
+        }
         
         int is_pipeline=0;
         char **cmds[100];
