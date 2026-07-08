@@ -984,13 +984,31 @@ int main(int argc, char *argv[]) {
             
             while ((dollar_ptr = strchr(args[i], '$')) != NULL) {
                 
-                char *var_start = dollar_ptr + 1;
-                char *var_end = var_start;
+                char *var_start;
+                char *var_end;
+                char *suffix_start; 
                 
-                while (isalnum(*var_end) || *var_end == '_') {
-                    var_end++;
+                if (dollar_ptr[1] == '{') {
+                    var_start = dollar_ptr + 2; 
+                    var_end = strchr(var_start, '}'); 
+                    
+                    if (var_end == NULL) {
+                        break; 
+                    }
+                    suffix_start = var_end + 1; 
+                } 
+                
+                else {
+                    var_start = dollar_ptr + 1; // Skip over the "$"
+                    var_end = var_start;
+                    
+                    while (isalnum(*var_end) || *var_end == '_') {
+                        var_end++;
+                    }
+                    suffix_start = var_end; 
                 }
 
+               
                 if (var_start == var_end) {
                     break;
                 }
@@ -1008,14 +1026,15 @@ int main(int argc, char *argv[]) {
                     }
                 }
 
+                
                 char *new_arg = malloc(1024);
                 memset(new_arg, 0, 1024);
                 
-                strncat(new_arg, args[i], dollar_ptr - args[i]); 
+                strncat(new_arg, args[i], dollar_ptr - args[i]);
                 strcat(new_arg, replacement_value);              
-                strcat(new_arg, var_end);                        
+                strcat(new_arg, suffix_start);                   
                 
-                
+            
                 args[i] = new_arg;
             }
         }
