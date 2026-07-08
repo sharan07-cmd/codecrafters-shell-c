@@ -344,6 +344,7 @@ int main(int argc, char *argv[]) {
   while (1)
   
   {
+
     for (int i = 0; i < bg_job_count; i++) {
             char marker = ' '; 
             
@@ -977,6 +978,30 @@ int main(int argc, char *argv[]) {
         }
 
         args[argc_count]=NULL;
+
+        for (int i = 0; args[i] != NULL; i++) {
+           
+            if (args[i][0] == '$') {
+                
+                char *target_var = &args[i][1]; // Skip the '$'
+                int found = 0;
+
+               
+                for (int j = 0; j < shell_var_count; j++) {
+                    if (strcmp(shell_vars[j].name, target_var) == 0) {
+                        // Swap the pointer to the stored value!
+                        args[i] = shell_vars[j].value; 
+                        found = 1;
+                        break;
+                    }
+                }
+                
+                if (!found) {
+                    args[i] = ""; 
+                }
+            }
+        }
+        
         int is_pipeline=0;
         char **cmds[100];
         int cmd_count=0;
