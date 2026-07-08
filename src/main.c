@@ -671,6 +671,31 @@ int main(int argc, char *argv[]) {
             }
         }
 
+        else if(strncmp(&buffer[8],"-w ",3)==0){
+            char *fpath = &buffer[11];
+
+            while (*fpath == ' ') {
+                fpath++;
+            }
+
+            int len = strlen(fpath);
+                while (len > 0 && (fpath[len - 1] == ' ' || fpath[len - 1] == '\r' || fpath[len - 1] == '\n')) {
+                fpath[len - 1] = '\0';
+                len--;
+            }
+
+            FILE *fptr= fopen(fpath,"w");
+            
+            if(fptr!=NULL){
+                for(int i=0;i<history_count;i++){
+                    fprintf(fptr, "%s\n", history[i]);
+                }
+                fclose(fptr);
+            }
+            continue;
+        }
+        
+
         if(buffer[7]==' '){
             n=atoi(&buffer[8]);
         }
