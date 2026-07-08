@@ -7,6 +7,7 @@
 #include <fcntl.h>
 #include <readline/readline.h>
 #include <readline/history.h>
+#include <ctype.h>
 #include <dirent.h>
 
 typedef struct {
@@ -87,6 +88,21 @@ void execute_pipeline_builtin(char **cmd_args) {
         exit(0);
     }
 }
+
+int is_valid_identifier(const char *name) {
+
+    if (name == NULL || name[0] == '\0') return 0;
+    
+    if (!isalpha(name[0]) && name[0] != '_') return 0;
+    
+    
+    for (int i = 1; name[i] != '\0'; i++) {
+        if (!isalnum(name[i]) && name[i] != '_') return 0;
+    }
+    
+    return 1;
+}
+
 
 char *script_generator(const char *text2,int state){
 
@@ -700,22 +716,30 @@ int main(int argc, char *argv[]) {
         }
 
         else{
-            char *assignment = &buffer[8]; // Skip "declare "
+
+            char *assignment = &buffer[8]; 
             char *equals_sign = strchr(assignment, '=');
         
             if (equals_sign != NULL) {
-                *equals_sign = '\0'; // Turn the '=' into a null terminator to split the string!
-                char *name = assignment;
-                char *value = equals_sign + 1; // The value starts right after the '='
 
-            // Strip hidden newlines from the value using your trusty reverse loop
+                *equals_sign = '\0'; 
+                char *name = assignment;
+                char *value = equals_sign + 1; 
+
+            
                 int len = strlen(value);
                 while (len > 0 && (value[len - 1] == '\n' || value[len - 1] == '\r')) {
                     value[len - 1] = '\0';
                     len--;
                 }
 
-            // Check if variable already exists (to overwrite it)
+                if (!is_valid_identifier(name)) {
+              
+                    printf("declare: `%s=%s': not a valid identifier\n", name, value);
+                    continue; 
+                }
+
+            
                 int found = 0;
                 for (int i = 0; i < shell_var_count; i++) {
                     if (strcmp(shell_vars[i].name, name) == 0) {
@@ -725,14 +749,14 @@ int main(int argc, char *argv[]) {
                     }
                 }
             
-            // If it doesn't exist, save it as a new variable
+            
                 if (!found && shell_var_count < 100) {
                     strcpy(shell_vars[shell_var_count].name, name);
                     strcpy(shell_vars[shell_var_count].value, value);
                     shell_var_count++;
                 }
             }
-            continue; // Back to prompt
+            continue; 
         }
     }
 
