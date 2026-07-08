@@ -1046,6 +1046,7 @@ int main(int argc, char *argv[]) {
                     args[k] = args[k + 1];
                 }
                 i--; 
+                argc_count--;
             }
         }
         
