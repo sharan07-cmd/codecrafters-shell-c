@@ -30,6 +30,14 @@ typedef struct {
 CompletionRule registry[100];
 int registry_size=0;
 
+struct ShellVar {
+    char name[256];
+    char value[1024];
+};
+
+struct ShellVar shell_vars[100]; 
+int shell_var_count = 0;
+
 void execute_pipeline_builtin(char **cmd_args) {
     if (strcmp(cmd_args[0], "echo") == 0) {
         for (int i = 1; cmd_args[i] != NULL; i++) {
@@ -665,18 +673,69 @@ int main(int argc, char *argv[]) {
 
     }
 
-    else if (strncmp(buffer, "declare -p ", 11) == 0) {
-    
-        char *var_name = &buffer[11];
-        int len = strlen(var_name);
+    else if (strncmp(buffer, "declare ", 8) == 0) {
+        if (strncmp(buffer, "declare -p ", 11) == 0){
+            char *var_name = &buffer[11];
+            int len = strlen(var_name);
 
-        while (len > 0 && (var_name[len - 1] == '\n' || var_name[len - 1] == '\r' || var_name[len - 1] == ' ')) {
-            var_name[len - 1] = '\0';
-            len--;
+            while (len > 0 && (var_name[len - 1] == '\n' || var_name[len - 1] == '\r' || var_name[len - 1] == ' ')) {
+                var_name[len - 1] = '\0';
+                len--;
+            }
+
+            char *var_name = &buffer[11];
+
+            int found = 0;
+            for (int i = 0; i < shell_var_count; i++) {
+                if (strcmp(shell_vars[i].name, var_name) == 0) {
+                    
+                    printf("declare -- %s=\"%s\"\n", shell_vars[i].name, shell_vars[i].value);
+                    found = 1;
+                    break;
+                }
+            }
+        
+            if (!found) {
+                printf("declare: %s: not found\n", var_name);
+            }
+            continue;
         }
 
-        printf("declare: %s: not found\n", var_name);
-        continue;
+        else{
+            char *assignment = &buffer[8]; // Skip "declare "
+            char *equals_sign = strchr(assignment, '=');
+        
+            if (equals_sign != NULL) {
+                *equals_sign = '\0'; // Turn the '=' into a null terminator to split the string!
+                char *name = assignment;
+                char *value = equals_sign + 1; // The value starts right after the '='
+
+            // Strip hidden newlines from the value using your trusty reverse loop
+                int len = strlen(value);
+                while (len > 0 && (value[len - 1] == '\n' || value[len - 1] == '\r')) {
+                    value[len - 1] = '\0';
+                    len--;
+                }
+
+            // Check if variable already exists (to overwrite it)
+                int found = 0;
+                for (int i = 0; i < shell_var_count; i++) {
+                    if (strcmp(shell_vars[i].name, name) == 0) {
+                        strcpy(shell_vars[i].value, value);
+                        found = 1;
+                        break;
+                    }
+                }
+            
+            // If it doesn't exist, save it as a new variable
+                if (!found && shell_var_count < 100) {
+                    strcpy(shell_vars[shell_var_count].name, name);
+                    strcpy(shell_vars[shell_var_count].value, value);
+                    shell_var_count++;
+                }
+            }
+            continue; // Back to prompt
+        }
     }
 
     else if(strncmp(buffer,"history",7)==0){
