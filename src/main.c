@@ -17,6 +17,7 @@ typedef struct {
 
 Job bg_jobs[100];
 int bg_job_count = 0;
+static int last_saved_index = 0;
 
 static char history[1000][1024];
 static int history_count=0;
@@ -711,9 +712,10 @@ int main(int argc, char *argv[]) {
             FILE *fptr= fopen(fpath,"a");
             
             if(fptr!=NULL){
-                for(int i=0;i<history_count;i++){
+                for(int i=last_saved_index;i<history_count;i++){
                     fprintf(fptr, "%s\n", history[i]);
                 }
+                last_saved_index=history_count;
                 fclose(fptr);
             }
             continue;
