@@ -665,6 +665,20 @@ int main(int argc, char *argv[]) {
 
     }
 
+    else if (strncmp(buffer, "declare -p ", 11) == 0) {
+    
+        char *var_name = &buffer[11];
+        int len = strlen(var_name);
+
+        while (len > 0 && (var_name[len - 1] == '\n' || var_name[len - 1] == '\r' || var_name[len - 1] == ' ')) {
+            var_name[len - 1] = '\0';
+            len--;
+        }
+
+        printf("declare: %s: not found\n", var_name);
+        continue;
+    }
+
     else if(strncmp(buffer,"history",7)==0){
         int n=history_count;
 
